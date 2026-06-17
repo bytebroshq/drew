@@ -19,6 +19,7 @@ Start here. Every doc in `docs/` with its purpose and status.
 | [`vsip/Survalent team manual draft for VSIP 4 Presentation.pptx`](vsip/Survalent%20team%20manual%20draft%20for%20VSIP%204%20Presentation.pptx) | Team-built draft (41 slides) | Reference |
 | [`vsip/SurvalentONE ADMS DERMS.pptx`](vsip/SurvalentONE%20ADMS%20DERMS.pptx) | Product deck for content/positioning | Reference |
 | [`vsip/Reference PPT 1A.pptx`](vsip/Reference%20PPT%201A.pptx) | Survalent brand design reference | Reference |
+| [`vsip/survalent-logo.png`](vsip/survalent-logo.png) | Survalent logo (400×78 PNG, transparent) — sourced from survalent.com | Asset |
 
 ## Reading Order
 
