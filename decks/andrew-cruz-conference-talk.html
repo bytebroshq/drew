@@ -667,12 +667,19 @@
                 if (touch && noFs) document.documentElement.classList.add('ios-room');
             }
             setupTouchNav() {
-                let s = 0;
-                document.addEventListener('touchstart', (e) => s = e.touches[0].clientX);
+                // tap to advance: a swipe would fight the scroll-to-minimize gesture,
+                // so we treat a stationary tap as navigation — right third back, rest forward
+                let sx = 0, sy = 0;
+                document.addEventListener('touchstart', (e) => {
+                    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+                });
                 document.addEventListener('touchend', (e) => {
-                    const d = s - e.changedTouches[0].clientX;
-                    if (d > 50) this.nextSlide();
-                    if (d < -50) this.prevSlide();
+                    const t = e.changedTouches[0];
+                    // ignore drags/scrolls and taps on controls
+                    if (Math.abs(t.clientX - sx) > 12 || Math.abs(t.clientY - sy) > 12) return;
+                    if (e.target.closest('button, a, .rotate-nudge')) return;
+                    if (t.clientX < window.innerWidth * 0.25) this.prevSlide();
+                    else this.nextSlide();
                 });
             }
             setupMouseWheel() {
