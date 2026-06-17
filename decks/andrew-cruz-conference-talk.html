@@ -228,6 +228,16 @@
         .fs-hint kbd { font: inherit; padding: 1px 6px; border-radius: 5px; background: rgba(0,0,0,.06); }
         .fs-hint.hide { opacity: 0; transform: translateY(8px); pointer-events: none; }
 
+        /* one-time nudge: phones in portrait get more room sideways */
+        .rotate-nudge { position: fixed; inset: 0; z-index: 1002; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+            background: rgba(11,21,48,.92); color: var(--text-on-ink); backdrop-filter: blur(4px);
+            font-family: var(--font-mono); font-size: 15px; letter-spacing: 1px; text-align: center; padding: 32px;
+            transition: opacity .5s var(--ease); }
+        .rotate-nudge.hide { opacity: 0; pointer-events: none; }
+        .rotate-nudge svg { width: 52px; height: 52px; stroke: currentColor; stroke-width: 1.6; fill: none; animation: tilt 2.4s var(--ease) infinite; }
+        @keyframes tilt { 0%, 55%, 100% { transform: rotate(0); } 75%, 95% { transform: rotate(-90deg); } }
+        .rotate-nudge small { color: var(--text-on-ink-muted); letter-spacing: 1.5px; }
+
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .2s !important; }
         }
@@ -238,7 +248,7 @@
             .deck-viewport, .deck-stage { position: static; width: auto; height: auto; transform: none !important; overflow: visible; }
             .slide { position: relative; visibility: visible !important; opacity: 1 !important; width: 1920px; height: 1080px; break-after: page; page-break-after: always; }
             .slide:last-child { break-after: auto; }
-            .deck-controls, .rail, .fs-hint { display: none !important; }
+            .deck-controls, .rail, .fs-hint, .rotate-nudge { display: none !important; }
         }
     </style>
 </head>
@@ -390,6 +400,12 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
         <span>Fullscreen</span><kbd>F</kbd>
     </button>
+
+    <div class="rotate-nudge hide" id="rotateNudge">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        <div>Rotate for the full view</div>
+        <small>tap to dismiss</small>
+    </div>
 
     <script>
         /* === SHARED NETWORK MOTIF ===
@@ -564,17 +580,25 @@
                 this.setupTouchNav();
                 this.setupMouseWheel();
                 this.setupFsHint();
+                this.setupRotateNudge();
                 this.showSlide(0);
             }
             setupStageScale() {
+                const vv = window.visualViewport;
                 const scale = () => {
-                    const f = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
-                    const x = (window.innerWidth - 1920 * f) / 2;
-                    const y = (window.innerHeight - 1080 * f) / 2;
+                    // prefer visualViewport: on iOS Safari it reflects the live visible
+                    // area as the toolbar collapses (esp. in landscape), where resize lies
+                    const w = (vv && vv.width) || window.innerWidth;
+                    const h = (vv && vv.height) || window.innerHeight;
+                    const f = Math.min(w / 1920, h / 1080);
+                    const x = (w - 1920 * f) / 2;
+                    const y = (h - 1080 * f) / 2;
                     this.stage.style.transform = `translate(${x}px, ${y}px) scale(${f})`;
                 };
                 scale();
                 window.addEventListener('resize', scale);
+                window.addEventListener('orientationchange', scale);
+                if (vv) { vv.addEventListener('resize', scale); vv.addEventListener('scroll', scale); }
             }
             setupKeyboardNav() {
                 document.addEventListener('keydown', (e) => {
@@ -607,6 +631,23 @@
                 ['mousemove', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, refresh));
                 document.addEventListener('fullscreenchange', refresh);
                 refresh();
+            }
+            setupRotateNudge() {
+                const nudge = document.getElementById('rotateNudge');
+                if (!nudge) return;
+                const touch = matchMedia('(pointer: coarse)').matches;
+                // only phones (not tablets) benefit; gate on the short edge
+                const isPhone = touch && Math.min(window.innerWidth, window.innerHeight) <= 480;
+                if (!isPhone) { nudge.remove(); return; }
+                let dismissed = false;
+                const sync = () => {
+                    const portrait = window.innerHeight > window.innerWidth;
+                    nudge.classList.toggle('hide', dismissed || !portrait);
+                };
+                nudge.addEventListener('click', () => { dismissed = true; sync(); });
+                window.addEventListener('resize', sync);
+                window.addEventListener('orientationchange', sync);
+                sync();
             }
             setupTouchNav() {
                 let s = 0;
