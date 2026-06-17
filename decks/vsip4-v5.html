@@ -62,8 +62,15 @@
         .grid-fx { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
         .globe-fx { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
         /* office-location cards — ambient churn (pop in / hold / fade out) over the rotating globe */
-        .offices { position: relative; flex: 1; align-self: stretch; }
-        .office { position: absolute; left: 0; top: 0; padding: 13px 19px; border-radius: 11px;
+        .offices {
+            position: absolute;
+            right: 110px;
+            bottom: 152px;
+            width: 980px;
+            height: 560px;
+            pointer-events: none;
+        }
+        .office { position: absolute; left: 0; top: 0; padding: 13px 19px; border-radius: 2px;
             background: rgba(255,255,255,.86); border: 1.6px solid var(--teal-deep);
             box-shadow: 0 14px 34px -20px rgba(8,43,56,.6); backdrop-filter: blur(3px);
             font-family: var(--font-mono); line-height: 1.18; white-space: nowrap; opacity: 0; }
@@ -304,11 +311,41 @@
         .slide--light .bignum .l { color: var(--text-muted); }
 
         /* region / footprint chips */
-        .regions { display: flex; flex-wrap: wrap; gap: 14px; }
+        .regions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-content: center;
+            gap: 18px;
+            max-width: 1240px;
+            margin-left: auto;
+            margin-right: auto;
+        }
         .region { font-family: var(--font-mono); font-size: 19px; letter-spacing: .5px; padding: 14px 22px; border-radius: 12px; border: 1px solid var(--cream-2); background: #fff; }
         .slide--dark .region { background: rgba(255,255,255,.045); border-color: var(--line-on-ink); color: var(--text-on-ink); }
         .region b { color: var(--teal-deep); font-weight: 600; }
         .slide--dark .region b { color: var(--teal); }
+
+        /* deployment proof points — stepped by continent */
+        .deployments { flex: 1; display: grid; grid-template-columns: 440px 1fr; gap: 72px; align-items: center; margin-bottom: 28px; }
+        .continent-list { display: flex; flex-direction: column; gap: 20px; }
+        .continent { border-left: 2px solid var(--rule); padding: 4px 0 4px 22px; }
+        .continent .name { font-size: 31px; font-weight: 600; letter-spacing: -.4px; color: var(--text-muted); }
+        .continent .meta { margin-top: 6px; font-family: var(--font-mono); font-size: 15px; letter-spacing: .5px; color: var(--text-muted); }
+        .continent.frag-in { opacity: .46; }
+        .continent.is-current { opacity: 1; border-left-color: var(--orange); }
+        .continent.is-current .name { color: var(--ink); }
+        .continent.is-current .meta { color: var(--teal-deep); }
+        .deployment-panels { position: relative; min-height: 430px; }
+        .deploy-panel { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; gap: 18px; pointer-events: none; visibility: hidden; }
+        .deploy-panel.frag { transform: translateX(26px); }
+        .deploy-panel.frag.frag-in { opacity: 0; transform: none; }
+        .deploy-panel.frag.frag-in.is-current { opacity: 1; pointer-events: auto; visibility: visible; }
+        .deploy-panel h3 { font-size: 38px; font-weight: 600; letter-spacing: -.6px; color: var(--ink); }
+        .deploy-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 18px; }
+        .deploy-card { border-left: 2px solid var(--teal-deep); padding: 13px 18px; background: rgba(255,255,255,.54); backdrop-filter: blur(2px); }
+        .deploy-card b { display: block; font-size: 22px; font-weight: 600; letter-spacing: -.2px; color: var(--text-dark); }
+        .deploy-card span { display: block; margin-top: 5px; font-family: var(--font-mono); font-size: 14px; letter-spacing: .5px; color: var(--text-muted); }
 
         /* ADMS + DERMS module map */
         .modmap { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; flex: 1; align-content: stretch; }
@@ -382,9 +419,9 @@
         /* content cards → hairline top rule, no box */
         .card, .slide--dark .card {
             background: transparent; border: none; border-radius: 0; box-shadow: none;
-            border-top: 1px solid var(--rule); padding: 24px 26px 22px 0;
+            border-left: 1px solid var(--rule); padding: 0 26px 22px 24px;
         }
-        .slide--dark .card { border-top-color: var(--line-on-ink); }
+        .slide--dark .card { border-left-color: var(--line-on-ink); }
         .card .num, .slide--dark .card .num {
             background: transparent; color: var(--teal-deep); border: none; border-radius: 0;
             width: auto; height: auto; padding: 0; display: block;
@@ -392,12 +429,12 @@
         }
         .slide--dark .card .num { color: var(--teal); }
         .card h3 { margin: 13px 0 10px; }
-        .card.hl, .slide--dark .card.hl { border-top: 2px solid var(--orange); box-shadow: none; }
+        .card.hl, .slide--dark .card.hl { border-left: 2px solid var(--orange); box-shadow: none; }
         .card.hl .num, .slide--dark .card.hl .num { color: var(--orange); background: transparent; }
 
         /* crop-mark frame stays as the emphasis variant — drop the top rule
            so the registration marks read on their own */
-        .card.frame, .slide--dark .card.frame { border-top: none; padding: 34px 30px; }
+        .card.frame, .slide--dark .card.frame { border-left: none; padding: 34px 30px; }
 
         /* qualities → hairline top rule */
         .qual, .slide--dark .qual {
@@ -538,18 +575,60 @@
             <section class="slide slide--light">
                 <div class="pad">
                     <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">ADMS Deployments Worldwide</span></div>
-                    <h2 class="reveal" data-d="1" style="font-size:52px;margin:20px 0 16px">Proven on every continent</h2>
-                    <p class="lede reveal" data-d="2" style="margin-bottom:46px">SurvalentONE runs distribution grids from small co-ops to some of the largest utilities on earth.</p>
-                    <div class="regions reveal" data-d="3" style="margin-bottom:auto">
-                        <span class="region"><b>PLN</b> — Indonesia · 10M+ meters</span>
-                        <span class="region"><b>HCMC</b> — Vietnam · FLISR</span>
-                        <span class="region">North America</span>
-                        <span class="region">EMEA</span>
-                        <span class="region">Middle East</span>
-                        <span class="region">Australia &amp; NZ</span>
-                        <span class="region">Southeast Asia</span>
+                    <h2 class="reveal" data-d="1" style="font-size:52px;margin:20px 0 16px">Proven across 40 countries</h2>
+                    <p class="lede reveal" data-d="2" style="margin-bottom:32px">Representative deployments from the source map — organized by region, with the reference scale kept visible.</p>
+                    <div class="deployments">
+                        <div class="continent-list">
+                            <div class="continent frag" data-fg="1"><div class="name">North America</div><div class="meta">Canada · United States</div></div>
+                            <div class="continent frag" data-fg="2"><div class="name">Latin America</div><div class="meta">Mexico · Panama · Colombia</div></div>
+                            <div class="continent frag" data-fg="3"><div class="name">EMEA</div><div class="meta">Turkey · Saudi Arabia · UAE · Nigeria</div></div>
+                            <div class="continent frag" data-fg="4"><div class="name">Asia Pacific</div><div class="meta">Indonesia · India · New Zealand</div></div>
+                        </div>
+                        <div class="deployment-panels">
+                            <div class="deploy-panel frag" data-fg="1">
+                                <h3>North America</h3>
+                                <div class="deploy-grid">
+                                    <div class="deploy-card"><b>Synergy North</b><span>Canada</span></div>
+                                    <div class="deploy-card"><b>Oakville Hydro</b><span>Canada</span></div>
+                                    <div class="deploy-card"><b>FortisBC</b><span>Canada</span></div>
+                                    <div class="deploy-card"><b>Newfoundland Power</b><span>Canada</span></div>
+                                    <div class="deploy-card"><b>Huntsville Utilities</b><span>United States</span></div>
+                                    <div class="deploy-card"><b>Central Georgia EMC</b><span>United States</span></div>
+                                </div>
+                            </div>
+                            <div class="deploy-panel frag" data-fg="2">
+                                <h3>Latin America</h3>
+                                <div class="deploy-grid">
+                                    <div class="deploy-card"><b>CFE</b><span>Mexico</span></div>
+                                    <div class="deploy-card"><b>Canal de Panama</b><span>Panama</span></div>
+                                    <div class="deploy-card"><b>edenorte</b><span>Dominican Republic</span></div>
+                                    <div class="deploy-card"><b>EPM</b><span>Colombia</span></div>
+                                    <div class="deploy-card"><b>CEO</b><span>Colombia</span></div>
+                                    <div class="deploy-card"><b>Cedenar</b><span>Colombia</span></div>
+                                </div>
+                            </div>
+                            <div class="deploy-panel frag" data-fg="3">
+                                <h3>EMEA</h3>
+                                <div class="deploy-grid">
+                                    <div class="deploy-card"><b>Metro Istanbul</b><span>Turkey</span></div>
+                                    <div class="deploy-card"><b>Saudi Electricity Company</b><span>Saudi Arabia</span></div>
+                                    <div class="deploy-card"><b>Saudi Aramco</b><span>Saudi Arabia</span></div>
+                                    <div class="deploy-card"><b>DEWA</b><span>United Arab Emirates</span></div>
+                                    <div class="deploy-card"><b>EKEDC</b><span>Nigeria</span></div>
+                                    <div class="deploy-card"><b>Enel Green Power</b><span>South Africa</span></div>
+                                </div>
+                            </div>
+                            <div class="deploy-panel frag" data-fg="4">
+                                <h3>Asia Pacific</h3>
+                                <div class="deploy-grid">
+                                    <div class="deploy-card"><b>PLN</b><span>Indonesia · 10,000,000+ meters</span></div>
+                                    <div class="deploy-card"><b>REC Power Distribution</b><span>India</span></div>
+                                    <div class="deploy-card"><b>Transpower</b><span>New Zealand</span></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="foot reveal" data-d="4">The same platform we'd architect for VSIP 4 already operates Vietnam's and the region's largest networks.</div>
+                    <div class="foot reveal" data-d="4">Reference scale: 40 countries · 800+ customers worldwide · 800+ implementations.</div>
                 </div>
             </section>
 
@@ -561,8 +640,8 @@
                     <div class="grid" style="grid-template-columns:repeat(4,1fr);flex:1;align-content:center;gap:36px">
                         <div class="bignum reveal" data-d="3"><div class="v"><span data-count="40">40</span><span class="u">+</span></div><div class="l">Countries</div></div>
                         <div class="bignum reveal" data-d="4"><div class="v tv"><span data-count="800">800</span><span class="u">+</span></div><div class="l">Customers worldwide</div></div>
-                        <div class="bignum reveal" data-d="5"><div class="v"><span data-count="1000">1,000</span><span class="u">+</span></div><div class="l">Implementations</div></div>
-                        <div class="bignum reveal" data-d="6"><div class="v ov">10M<span class="u">+</span></div><div class="l">Meters on the largest system<br>(PLN, Indonesia)</div></div>
+                        <div class="bignum reveal" data-d="5"><div class="v"><span data-count="800">800</span><span class="u">+</span></div><div class="l">Implementations</div></div>
+                        <div class="bignum reveal" data-d="6"><div class="v ov">10M<span class="u">+</span></div><div class="l">Meters across the 3 largest<br>PLN Indonesia systems</div></div>
                     </div>
                     <div class="foot reveal" data-d="6">A grid-first heritage — DERMS sits on real network topology, not a market model bolted on.</div>
                 </div>
@@ -1410,6 +1489,18 @@
             setFrags(slide, mode) {
                 if (!slide) return;
                 slide.querySelectorAll('.frag').forEach(f => f.classList.toggle('frag-in', mode === 'all'));
+                this.updateDeploymentCurrent(slide);
+            }
+            updateDeploymentCurrent(slide) {
+                if (!slide) return;
+                const box = slide.querySelector('.deployments');
+                if (!box) return;
+                const shown = Array.from(box.querySelectorAll('.frag.frag-in'));
+                const groups = shown.map(f => parseInt(f.dataset.fg || '0', 10)).filter(Boolean);
+                const current = groups.length ? String(Math.max(...groups)) : null;
+                box.querySelectorAll('.is-current').forEach(el => el.classList.remove('is-current'));
+                if (!current) return;
+                box.querySelectorAll(`.frag[data-fg="${current}"]`).forEach(el => el.classList.add('is-current'));
             }
             animateCounts(slide) {
                 if (!slide) return;
@@ -1443,6 +1534,7 @@
                     const g = pending[0].dataset.fg;
                     if (g === undefined) pending[0].classList.add('frag-in');
                     else pending.filter(f => f.dataset.fg === g).forEach(f => f.classList.add('frag-in'));
+                    this.updateDeploymentCurrent(slide);
                     return;
                 }
                 this.showSlide(this.currentSlide + 1, { reveal: 'none' });
@@ -1455,6 +1547,7 @@
                     const g = last.dataset.fg;
                     if (g === undefined) last.classList.remove('frag-in');
                     else shown.filter(f => f.dataset.fg === g).forEach(f => f.classList.remove('frag-in'));
+                    this.updateDeploymentCurrent(slide);
                     return;
                 }
                 this.showSlide(this.currentSlide - 1, { reveal: 'all' });
