@@ -211,6 +211,17 @@
         .deck-controls { position: fixed; right: 26px; bottom: 22px; z-index: 1000; font-family: var(--font-mono); font-size: 14px; letter-spacing: 2px; color: var(--text-muted); background: rgba(255,255,255,.75); padding: 7px 14px; border-radius: 20px; backdrop-filter: blur(6px); }
         .rail { position: fixed; left: 0; bottom: 0; height: 3px; background: var(--blue); z-index: 1000; transition: width .5s var(--ease); }
 
+        /* floating fullscreen helper — fades out when fullscreen or after idle */
+        .fs-hint { position: fixed; right: 26px; bottom: 38px; z-index: 1001; display: inline-flex; align-items: center; gap: 9px;
+            font-family: var(--font-mono); font-size: 13px; letter-spacing: 1.5px; color: var(--text-muted);
+            background: rgba(255,255,255,.78); padding: 9px 15px; border: 0; border-radius: 22px; cursor: pointer;
+            backdrop-filter: blur(6px); box-shadow: 0 4px 18px rgba(0,0,0,.08);
+            transition: opacity .5s var(--ease), transform .5s var(--ease); }
+        .fs-hint:hover { color: var(--text); }
+        .fs-hint svg { width: 15px; height: 15px; stroke: currentColor; stroke-width: 2; fill: none; }
+        .fs-hint kbd { font: inherit; padding: 1px 6px; border-radius: 5px; background: rgba(0,0,0,.06); }
+        .fs-hint.hide { opacity: 0; transform: translateY(8px); pointer-events: none; }
+
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .2s !important; }
         }
@@ -221,7 +232,7 @@
             .deck-viewport, .deck-stage { position: static; width: auto; height: auto; transform: none !important; overflow: visible; }
             .slide { position: relative; visibility: visible !important; opacity: 1 !important; width: 1920px; height: 1080px; break-after: page; page-break-after: always; }
             .slide:last-child { break-after: auto; }
-            .deck-controls, .rail { display: none !important; }
+            .deck-controls, .rail, .fs-hint { display: none !important; }
         }
     </style>
 </head>
@@ -368,6 +379,11 @@
     </div>
 
     <div class="rail" id="rail"></div>
+
+    <button class="fs-hint" id="fsHint" title="Fullscreen (F)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+        <span>Fullscreen</span><kbd>F</kbd>
+    </button>
 
     <script>
         /* === SHARED NETWORK MOTIF ===
@@ -541,6 +557,7 @@
                 this.setupKeyboardNav();
                 this.setupTouchNav();
                 this.setupMouseWheel();
+                this.setupFsHint();
                 this.showSlide(0);
             }
             setupStageScale() {
@@ -565,6 +582,22 @@
             toggleFullscreen() {
                 if (document.fullscreenElement) document.exitFullscreen();
                 else document.documentElement.requestFullscreen();
+            }
+            setupFsHint() {
+                const hint = document.getElementById('fsHint');
+                if (!hint) return;
+                let idle;
+                const refresh = () => {
+                    clearTimeout(idle);
+                    hint.classList.add('hide');
+                    // surface only after a spell of inactivity, and never in fullscreen
+                    if (document.fullscreenElement) return;
+                    idle = setTimeout(() => hint.classList.remove('hide'), 3000);
+                };
+                hint.addEventListener('click', () => this.toggleFullscreen());
+                ['mousemove', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, refresh));
+                document.addEventListener('fullscreenchange', refresh);
+                refresh();
             }
             setupTouchNav() {
                 let s = 0;
