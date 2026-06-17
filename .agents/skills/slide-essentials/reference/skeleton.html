@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- viewport-fit=cover lets the deck paint under iOS notch/home-indicator -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Deck Title</title>
+
+    <!-- iPhone: "Add to Home Screen" launches the deck chrome-free (closest thing to
+         real fullscreen on iOS Safari, which has no Fullscreen API). theme-color must
+         match the deck's darkest background so the status bar blends in. -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0b1530">
+
+    <!-- Fonts: never system fonts. Pick distinctive faces (Fontshare / Google Fonts). -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        /* === THEME (edit these) === */
+        :root {
+            --ink: #0b1530;           /* darkest bg — keep in sync with theme-color */
+            --ink-2: #0e1c3f;
+            --cream: #f5f3f0;
+            --blue: #4361ee;
+            --text-dark: #14182b;
+            --text-muted: #6b7186;
+            --text-on-ink: #eef1fb;
+            --text-on-ink-muted: #93a0c9;
+            --font-display: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+            --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* === FIXED 16:9 STAGE (do not alter the geometry) ===
+           Author every slide at 1920x1080. The stage scales as ONE block to the
+           viewport via JS transform — it letter/pillarboxes, never reflows. */
+        html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--ink); }
+        .deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--ink); }
+        .deck-stage {
+            position: absolute; left: 0; top: 0;
+            width: 1920px; height: 1080px;
+            overflow: hidden; transform-origin: 0 0;
+        }
+        .slide {
+            position: absolute; inset: 0;
+            width: 1920px; height: 1080px;
+            overflow: hidden;
+            /* switch slides with visibility/opacity — NOT display:none, which later
+               layout classes (.slide-content{display:flex}) would override and show all */
+            visibility: hidden; opacity: 0; pointer-events: none;
+            font-family: var(--font-display); color: var(--text-dark);
+            transition: opacity 0.5s var(--ease);
+        }
+        .slide.active, .slide.visible { visibility: visible; opacity: 1; pointer-events: auto; z-index: 1; }
+        img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+        .slide--dark { background: radial-gradient(120% 130% at 15% 0%, var(--ink-2) 0%, var(--ink) 70%); color: var(--text-on-ink); }
+        .slide--light { background: var(--cream); }
+        .pad { padding: 110px; }
+
+        /* === iPhone scroll-to-minimize ===
+           iOS Safari only collapses its toolbars on a real scroll — not on rotate,
+           not via scrollTo, not via 100dvh. So when the device is iPhone-Safari
+           (set by JS adding .ios-room), make the document scrollable by exactly the
+           toolbar height: a 100lvh spacer. One swipe collapses the chrome; the fixed
+           .deck-viewport stays put on top and the spacer is just dead scroll room. */
+        .ios-spacer { display: none; }
+        html.ios-room, html.ios-room body { overflow: visible; height: auto; }
+        html.ios-room .ios-spacer { display: block; width: 1px; height: 100lvh; pointer-events: none; }
+
+        /* === PROGRESS / CONTROLS === */
+        .deck-controls { position: fixed; right: 26px; bottom: 22px; z-index: 1000; font-family: var(--font-mono); font-size: 14px; letter-spacing: 2px; color: var(--text-muted); background: rgba(255,255,255,.75); padding: 7px 14px; border-radius: 20px; backdrop-filter: blur(6px); }
+        .rail { position: fixed; left: 0; bottom: 0; height: 3px; background: var(--blue); z-index: 1000; transition: width .5s var(--ease); }
+
+        /* floating fullscreen helper — idle-reveal, hidden in fullscreen, auto-removed
+           on devices without the Fullscreen API (iPhone) */
+        .fs-hint { position: fixed; right: 26px; bottom: 38px; z-index: 1001; display: inline-flex; align-items: center; gap: 9px;
+            font-family: var(--font-mono); font-size: 13px; letter-spacing: 1.5px; color: var(--text-muted);
+            background: rgba(255,255,255,.78); padding: 9px 15px; border: 0; border-radius: 22px; cursor: pointer;
+            backdrop-filter: blur(6px); box-shadow: 0 4px 18px rgba(0,0,0,.08);
+            transition: opacity .5s var(--ease), transform .5s var(--ease); }
+        .fs-hint:hover { color: var(--text-dark); }
+        .fs-hint svg { width: 15px; height: 15px; stroke: currentColor; stroke-width: 2; fill: none; }
+        .fs-hint kbd { font: inherit; padding: 1px 6px; border-radius: 5px; background: rgba(0,0,0,.06); }
+        .fs-hint.hide { opacity: 0; transform: translateY(8px); pointer-events: none; }
+
+        /* one-time nudge: phones in portrait get far more room in landscape */
+        .rotate-nudge { position: fixed; inset: 0; z-index: 1002; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+            background: rgba(11,21,48,.92); color: var(--text-on-ink); backdrop-filter: blur(4px);
+            font-family: var(--font-mono); font-size: 15px; letter-spacing: 1px; text-align: center; padding: 32px;
+            transition: opacity .5s var(--ease); }
+        .rotate-nudge.hide { opacity: 0; pointer-events: none; }
+        .rotate-nudge svg { width: 52px; height: 52px; stroke: currentColor; stroke-width: 1.6; fill: none; animation: tilt 2.4s var(--ease) infinite; }
+        @keyframes tilt { 0%, 55%, 100% { transform: rotate(0); } 75%, 95% { transform: rotate(-90deg); } }
+        .rotate-nudge small { color: var(--text-on-ink-muted); letter-spacing: 1.5px; }
+
+        /* tap-zone hints (touch only) — mirror the fullscreen helper's idle reveal */
+        .tap-hint { position: fixed; top: 50%; z-index: 1001; transform: translateY(-50%); display: none;
+            align-items: center; justify-content: center; width: 46px; height: 46px; border: 0; border-radius: 50%;
+            color: var(--text-muted); background: rgba(255,255,255,.78); backdrop-filter: blur(6px);
+            box-shadow: 0 4px 18px rgba(0,0,0,.08); transition: opacity .5s var(--ease); }
+        .tap-hint svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; }
+        .tap-hint--prev { left: 18px; }
+        .tap-hint--next { right: 18px; }
+        .tap-hint.show { display: inline-flex; }
+        .tap-hint.hide { opacity: 0; pointer-events: none; }
+
+        /* === REVEAL ANIMATIONS (opt-in per element via .reveal + data-d="N") === */
+        .reveal { opacity: 0; transform: translateY(24px); transition: opacity var(--ease) .7s, transform var(--ease) .7s; }
+        .slide.visible .reveal { opacity: 1; transform: none; }
+        .slide.visible [data-d="1"] { transition-delay: .12s; }
+        .slide.visible [data-d="2"] { transition-delay: .24s; }
+        .slide.visible [data-d="3"] { transition-delay: .36s; }
+        .slide.visible [data-d="4"] { transition-delay: .48s; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .2s !important; }
+        }
+
+        /* === PRINT (one slide per page — feeds the PDF export) === */
+        @media print {
+            html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+            .deck-viewport, .deck-stage { position: static; width: auto; height: auto; transform: none !important; overflow: visible; }
+            .slide { position: relative; visibility: visible !important; opacity: 1 !important; width: 1920px; height: 1080px; break-after: page; page-break-after: always; }
+            .slide:last-child { break-after: auto; }
+            .deck-controls, .rail, .fs-hint, .rotate-nudge, .tap-hint { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="deck-viewport">
+        <main class="deck-stage" id="deckStage">
+
+            <!-- === SLIDE 1: TITLE === -->
+            <section class="slide slide--dark active">
+                <div class="pad">
+                    <div class="reveal" data-d="1" style="font-family:var(--font-mono);letter-spacing:2px;color:var(--text-on-ink-muted)">KICKER / SECTION</div>
+                    <h1 class="reveal" data-d="2" style="font-size:96px;line-height:1.05;margin-top:24px">Headline goes <em>here</em></h1>
+                    <p class="reveal" data-d="3" style="margin-top:28px;color:var(--text-on-ink-muted)">Author — role, org</p>
+                </div>
+            </section>
+
+            <!-- === SLIDE 2 === -->
+            <section class="slide slide--light">
+                <div class="pad">
+                    <h2 class="reveal" data-d="1" style="font-size:72px">Second slide</h2>
+                    <p class="reveal" data-d="2" style="margin-top:24px;max-width:1100px;color:var(--text-muted)">One idea per slide. Split before you shrink.</p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- progress rail -->
+    <div class="rail" id="rail"></div>
+
+    <!-- optional slide counter (engine fills it if present) -->
+    <div class="deck-controls" id="deckControls"></div>
+
+    <!-- fullscreen helper (desktop/laptop); auto-removed where unsupported -->
+    <button class="fs-hint" id="fsHint" title="Fullscreen (F)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+        <span>Fullscreen</span><kbd>F</kbd>
+    </button>
+
+    <!-- portrait-phone rotate nudge -->
+    <div class="rotate-nudge hide" id="rotateNudge">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        <div>Rotate for the full view</div>
+        <small>tap to dismiss</small>
+    </div>
+
+    <!-- tap-zone hints (touch only) -->
+    <button class="tap-hint tap-hint--prev" id="tapPrev" aria-label="Previous slide">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+    </button>
+    <button class="tap-hint tap-hint--next" id="tapNext" aria-label="Next slide">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+    </button>
+
+    <!-- iPhone scroll room (kept empty; .ios-room toggles it on) -->
+    <div class="ios-spacer" aria-hidden="true"></div>
+
+    <script>
+        /* === PRESENTATION ENGINE ===
+           One class wires scaling + every navigation/affordance surface. Each setup
+           method self-gates to the device it's for, so the same file behaves correctly
+           on laptop, tablet, and iPhone Safari with no user agent sniffing. */
+        class SlidePresentation {
+            constructor() {
+                this.slides = document.querySelectorAll('.slide');
+                this.currentSlide = 0;
+                this.stage = document.getElementById('deckStage');
+                this.rail = document.getElementById('rail');
+                this.setupStageScale();
+                this.setupKeyboardNav();
+                this.setupTouchNav();
+                this.setupMouseWheel();
+                this.setupFsHint();
+                this.setupRotateNudge();
+                this.setupTapHints();
+                this.setupIosRoom();
+                this.showSlide(0);
+            }
+            setupStageScale() {
+                const vv = window.visualViewport;
+                const scale = () => {
+                    // prefer visualViewport: on iOS Safari it reflects the live visible
+                    // area as the toolbar collapses (esp. in landscape), where resize lies
+                    const w = (vv && vv.width) || window.innerWidth;
+                    const h = (vv && vv.height) || window.innerHeight;
+                    const f = Math.min(w / 1920, h / 1080);
+                    const x = (w - 1920 * f) / 2;
+                    const y = (h - 1080 * f) / 2;
+                    this.stage.style.transform = `translate(${x}px, ${y}px) scale(${f})`;
+                };
+                scale();
+                window.addEventListener('resize', scale);
+                window.addEventListener('orientationchange', scale);
+                if (vv) { vv.addEventListener('resize', scale); vv.addEventListener('scroll', scale); }
+            }
+            setupKeyboardNav() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); this.nextSlide(); }
+                    else if (e.key === 'ArrowLeft') { e.preventDefault(); this.prevSlide(); }
+                    else if (e.key === 'End') this.showSlide(this.slides.length - 1);
+                    else if (e.key === 'Home') this.showSlide(0);
+                    else if (e.key === 'f' || e.key === 'F') { e.preventDefault(); this.toggleFullscreen(); }
+                });
+            }
+            toggleFullscreen() {
+                // capability check doubles as the iPhone guard: no API → no-op
+                if (!document.documentElement.requestFullscreen) return;
+                if (document.fullscreenElement) document.exitFullscreen();
+                else document.documentElement.requestFullscreen();
+            }
+            setupFsHint() {
+                const hint = document.getElementById('fsHint');
+                if (!hint) return;
+                // iPhone Safari has no Fullscreen API — don't show a dead button
+                if (!document.documentElement.requestFullscreen) { hint.remove(); return; }
+                let idle;
+                const refresh = () => {
+                    clearTimeout(idle);
+                    hint.classList.add('hide');
+                    // surface only after a spell of inactivity, and never in fullscreen
+                    if (document.fullscreenElement) return;
+                    idle = setTimeout(() => hint.classList.remove('hide'), 3000);
+                };
+                hint.addEventListener('click', () => this.toggleFullscreen());
+                ['mousemove', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, refresh));
+                document.addEventListener('fullscreenchange', refresh);
+                refresh();
+            }
+            setupRotateNudge() {
+                const nudge = document.getElementById('rotateNudge');
+                if (!nudge) return;
+                const touch = matchMedia('(pointer: coarse)').matches;
+                // only phones (not tablets) benefit; gate on the short edge
+                const isPhone = touch && Math.min(window.innerWidth, window.innerHeight) <= 480;
+                if (!isPhone) { nudge.remove(); return; }
+                let dismissed = false;
+                const sync = () => {
+                    const portrait = window.innerHeight > window.innerWidth;
+                    nudge.classList.toggle('hide', dismissed || !portrait);
+                };
+                nudge.addEventListener('click', () => { dismissed = true; sync(); });
+                window.addEventListener('resize', sync);
+                window.addEventListener('orientationchange', sync);
+                sync();
+            }
+            setupTapHints() {
+                const prev = document.getElementById('tapPrev'), next = document.getElementById('tapNext');
+                if (!prev || !next) return;
+                // touch only — on desktop the keyboard/wheel are the affordance
+                if (!matchMedia('(pointer: coarse)').matches) { prev.remove(); next.remove(); return; }
+                prev.classList.add('show'); next.classList.add('show');
+                let idle;
+                const reveal = () => {
+                    clearTimeout(idle);
+                    prev.classList.remove('hide'); next.classList.remove('hide');
+                    idle = setTimeout(() => { prev.classList.add('hide'); next.classList.add('hide'); }, 2500);
+                };
+                prev.addEventListener('click', () => { this.prevSlide(); reveal(); });
+                next.addEventListener('click', () => { this.nextSlide(); reveal(); });
+                ['touchstart', 'touchend'].forEach(ev => document.addEventListener(ev, reveal));
+                reveal();
+            }
+            setupIosRoom() {
+                // only iPhone Safari (no Fullscreen API + coarse pointer) needs the scroll
+                // hack; tablets/desktop have real fullscreen, so leave them non-scrolling
+                const touch = matchMedia('(pointer: coarse)').matches;
+                const noFs = !document.documentElement.requestFullscreen;
+                if (touch && noFs) document.documentElement.classList.add('ios-room');
+            }
+            setupTouchNav() {
+                // tap to advance: a swipe would fight the scroll-to-minimize gesture,
+                // so we treat a stationary tap as navigation — left quarter back, rest forward
+                let sx = 0, sy = 0;
+                document.addEventListener('touchstart', (e) => {
+                    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+                });
+                document.addEventListener('touchend', (e) => {
+                    const t = e.changedTouches[0];
+                    // ignore drags/scrolls and taps on controls
+                    if (Math.abs(t.clientX - sx) > 12 || Math.abs(t.clientY - sy) > 12) return;
+                    if (e.target.closest('button, a, .rotate-nudge')) return;
+                    if (t.clientX < window.innerWidth * 0.25) this.prevSlide();
+                    else this.nextSlide();
+                });
+            }
+            setupMouseWheel() {
+                let lock = false;
+                document.addEventListener('wheel', (e) => {
+                    if (lock) return;
+                    lock = true; setTimeout(() => lock = false, 600);
+                    if (e.deltaY > 0) this.nextSlide();
+                    if (e.deltaY < 0) this.prevSlide();
+                }, { passive: true });
+            }
+            showSlide(index) {
+                this.currentSlide = Math.max(0, Math.min(index, this.slides.length - 1));
+                this.slides.forEach((slide, i) => {
+                    const active = i === this.currentSlide;
+                    slide.classList.toggle('active', active);
+                    slide.classList.toggle('visible', active);
+                });
+                this.updateControls();
+            }
+            nextSlide() { this.showSlide(this.currentSlide + 1); }
+            prevSlide() { this.showSlide(this.currentSlide - 1); }
+            updateControls() {
+                const c = document.getElementById('deckControls');
+                if (c) c.textContent = String(this.currentSlide + 1).padStart(2, '0') + ' / ' + String(this.slides.length).padStart(2, '0');
+                if (this.rail) this.rail.style.width = ((this.currentSlide + 1) / this.slides.length * 100) + 'vw';
+            }
+        }
+        new SlidePresentation();
+    </script>
+</body>
+</html>

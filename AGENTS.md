@@ -1,11 +1,11 @@
 # Drew
 
-Andre Cruz's HTML slide decks. One self-contained HTML file per deck, built with the project-local frontend-slides skill.
+Andrew Cruz's HTML slide decks. One self-contained HTML file per deck, built with the project-local `slide-essentials` skill.
 
 ## Knowledge
 
 - **Before any work**: read [`docs/INDEX.md`](docs/INDEX.md) for the current doc catalog and context.
-- Always use `frontend-slides` skill before any deck work.
+- Always use the `slide-essentials` skill before any deck work.
 - Output lands in [`decks/`](decks/).
 
 ## Working stance

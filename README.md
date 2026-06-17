@@ -1,6 +1,6 @@
 # Drew
 
-HTML slide decks. Built with [Frontend Slides](https://github.com/zarazhangrui/frontend-slides).
+Zero-dependency, single-file HTML slide decks.
 
 ## Slides
 
@@ -8,4 +8,6 @@ Each deck is a standalone HTML file in `decks/`.
 
 ## Skill
 
-`.agents/skills/frontend-slides/` — project-local checkout of [frontend-slides](https://github.com/zarazhangrui/frontend-slides) skill.
+`.agents/skills/slide-essentials/` — the project-local deck skill: fixed 16:9 stage, navigation engine, fullscreen, mobile/iOS support, and composition. Copy `reference/skeleton.html` to start a new deck.
+
+Distilled from [frontend-slides](https://github.com/zarazhangrui/frontend-slides) plus the mobile/nav/fullscreen work built for this project.
