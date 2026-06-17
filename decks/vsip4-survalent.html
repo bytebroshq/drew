@@ -96,6 +96,12 @@
         .slide--dark .card p { color: var(--text-on-ink-muted); }
         .card.hl { border-color: var(--orange); box-shadow: 0 18px 44px -26px rgba(255,122,51,.55); }
         .card.hl .num { background: var(--orange); }
+        /* crop-mark frame: border lines overshoot the corners like registration marks */
+        .card.frame { --frame-os: 13px; --frame-line: rgba(125,196,196,.34); background: transparent; border: none; border-radius: 0; box-shadow: none; position: relative; }
+        .slide--dark .card.frame { background: transparent; border: none; }
+        .card.frame::before, .card.frame::after { content: ""; position: absolute; pointer-events: none; }
+        .card.frame::before { top: calc(var(--frame-os) * -1); bottom: calc(var(--frame-os) * -1); left: 0; right: 0; border-left: 1px solid var(--frame-line); border-right: 1px solid var(--frame-line); }
+        .card.frame::after { left: calc(var(--frame-os) * -1); right: calc(var(--frame-os) * -1); top: 0; bottom: 0; border-top: 1px solid var(--frame-line); border-bottom: 1px solid var(--frame-line); }
 
         /* stat card */
         .stat { text-align: left; }
@@ -109,8 +115,8 @@
         .slide--dark .stat .v.tv { color: var(--teal); }
         .stat .v.ov { color: var(--orange); }
 
-        /* trend card — stat-led */
-        .card.trend { display: flex; flex-direction: column; }
+        /* trend card — stat-led, non-visual (open editorial column, no paper chrome) */
+        .card.trend { display: flex; flex-direction: column; background: transparent; border: none; border-radius: 0; box-shadow: none; padding: 4px 0 0; }
         .card.trend .trend-stat { display: flex; align-items: baseline; gap: 8px; }
         .card.trend .trend-stat .v { font-size: 76px; font-weight: 700; letter-spacing: -3px; line-height: 1; color: var(--ink); }
         .card.trend .trend-stat .v.tv { color: var(--teal-deep); }
@@ -302,7 +308,7 @@
                     <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Industry Trends</span></div>
                     <h2 class="reveal" data-d="1" style="font-size:56px;margin:20px 0 18px">The ground is shifting under industrial power</h2>
                     <p class="lede reveal" data-d="2" style="margin-bottom:46px">Three forces are reshaping how industrial parks are powered — and VSIP 4 sits at their intersection.</p>
-                    <div class="grid g3" style="flex:1;align-content:stretch">
+                    <div class="grid g3" style="flex:1;align-content:stretch;gap:72px;margin:0 60px">
                         <div class="card trend reveal" data-d="3">
                             <div class="trend-stat"><span class="v ov" data-count="2050">2050</span></div>
                             <div class="trend-unit">Vietnam's net-zero deadline</div>
@@ -332,10 +338,10 @@
                     <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">The Challenge for VSIP 4</span></div>
                     <h2 class="reveal" data-d="1" style="font-size:50px;margin:20px 0 18px;max-width:1500px">187 MW of solar on a greenfield grid is hard to <span class="teal">operate</span></h2>
                     <p class="lede reveal" data-d="2" style="margin-bottom:42px">Three problems every smart industrial park has to solve:</p>
-                    <div class="grid g3" style="flex:1;align-content:start">
-                        <div class="card reveal" data-d="3"><span class="num">1</span><h3>No DER visibility</h3><p>You can't see how distributed solar is impacting the 22kV network in real time.</p></div>
-                        <div class="card reveal" data-d="4"><span class="num">2</span><h3>Zero-export can't hold</h3><p>Enforcing export limits reliably needs live topology awareness — not spreadsheets.</p></div>
-                        <div class="card reveal" data-d="5"><span class="num">3</span><h3>Islanding fails</h3><p>Black start and island formation require tight SCADA + DERMS integration.</p></div>
+                    <div class="grid g3" style="flex:1;align-content:start;gap:54px;margin:0 60px">
+                        <div class="card frame reveal" data-d="3"><span class="num">1</span><h3>No DER visibility</h3><p>You can't see how distributed solar is impacting the 22kV network in real time.</p></div>
+                        <div class="card frame reveal" data-d="4"><span class="num">2</span><h3>Zero-export can't hold</h3><p>Enforcing export limits reliably needs live topology awareness — not spreadsheets.</p></div>
+                        <div class="card frame reveal" data-d="5"><span class="num">3</span><h3>Islanding fails</h3><p>Black start and island formation require tight SCADA + DERMS integration.</p></div>
                     </div>
                     <div class="foot reveal" data-d="6">These are grid-operations problems — they need a grid-operations platform.</div>
                 </div>
