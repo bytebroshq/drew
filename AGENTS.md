@@ -1,12 +1,12 @@
 # Drew
 
-ByteBros HTML slide decks. One self-contained HTML file per deck, built with the project-local frontend-slides skill.
+Andre Cruz's HTML slide decks. One self-contained HTML file per deck, built with the project-local frontend-slides skill.
 
 ## Knowledge
 
-- **Before any slide work**: load [`.agents/skills/frontend-slides/SKILL.md`](.agents/skills/frontend-slides/SKILL.md).
+- **Before any work**: read [`docs/INDEX.md`](docs/INDEX.md) for the current doc catalog and context.
+- Always use `frontend-slides` skill before any deck work.
 - Output lands in [`decks/`](decks/).
-- Product rationale, decisions, and roadmap live in the workspace Folio knowledge base.
 
 ## Working stance
 
