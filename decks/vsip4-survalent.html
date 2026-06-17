@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>SurvalentONE ADMS + DERMS — VSIP 4</title>
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#04141b">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* === THEME — Survalent: deep teal-navy, energized teal, signal orange === */
+        :root {
+            --ink: #04141b;            /* darkest bg — keep in sync with theme-color */
+            --ink-2: #082b38;
+            --ink-3: #0c3a4a;
+            --cream: #f4f2ec;
+            --cream-2: #e7e3d8;
+            --teal: #1fc3b6;
+            --teal-deep: #0e8b86;
+            --orange: #ff7a33;
+            --orange-soft: #ffb27a;
+            --text-dark: #11201f;
+            --text-muted: #5d6f72;
+            --text-on-ink: #eaf6f5;
+            --text-on-ink-muted: #84a8ad;
+            --line-on-ink: rgba(125,196,196,.22);
+            --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+            --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* === FIXED 16:9 STAGE === */
+        html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--ink); }
+        .deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--ink); }
+        .deck-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; transform-origin: 0 0; }
+        .slide {
+            position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden;
+            visibility: hidden; opacity: 0; pointer-events: none;
+            font-family: var(--font-display); color: var(--text-dark);
+            transition: opacity 0.5s var(--ease);
+        }
+        .slide.active, .slide.visible { visibility: visible; opacity: 1; pointer-events: auto; z-index: 1; }
+        img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+        .slide--dark {
+            background:
+                radial-gradient(85% 75% at 4% 2%, rgba(31,195,182,.10) 0%, transparent 50%),
+                radial-gradient(95% 85% at 100% 100%, rgba(255,122,51,.09) 0%, transparent 52%),
+                linear-gradient(140deg, #062420 0%, #05151b 30%, #050708 58%, #160d08 82%, #241105 100%);
+            color: var(--text-on-ink);
+        }
+        .slide--light { background:
+            radial-gradient(80% 90% at 100% 0%, rgba(31,195,182,.07) 0%, transparent 55%),
+            var(--cream); }
+        .grid-fx { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        .pad { position: absolute; inset: 0; z-index: 1; padding: 96px 110px; display: flex; flex-direction: column; }
+
+        /* === TYPE HELPERS === */
+        .kicker { font-family: var(--font-mono); font-size: 19px; font-weight: 500; letter-spacing: 3px; text-transform: uppercase; color: var(--teal-deep); }
+        .slide--dark .kicker { color: var(--teal); }
+        h1 { font-weight: 700; line-height: 1.02; letter-spacing: -1.5px; }
+        h2 { font-weight: 600; line-height: 1.04; letter-spacing: -1px; }
+        .h-eyebrow { display: flex; align-items: center; gap: 16px; }
+        .h-eyebrow .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 0 5px rgba(255,122,51,.18); }
+        .lede { color: var(--text-muted); font-size: 30px; line-height: 1.45; max-width: 1180px; }
+        .slide--dark .lede { color: var(--text-on-ink-muted); }
+        .accent { color: var(--orange); }
+        .teal { color: var(--teal-deep); }
+        .slide--dark .teal { color: var(--teal); }
+        em { font-style: normal; color: var(--orange); }
+
+        /* footer note */
+        .foot { margin-top: auto; padding-top: 26px; font-family: var(--font-mono); font-size: 17px; letter-spacing: .5px; color: var(--text-muted); }
+        .slide--dark .foot { color: var(--text-on-ink-muted); }
+
+        /* === GRIDS === */
+        .grid { display: grid; gap: 26px; }
+        .g2 { grid-template-columns: repeat(2, 1fr); }
+        .g3 { grid-template-columns: repeat(3, 1fr); }
+        .g5 { grid-template-columns: repeat(5, 1fr); }
+
+        /* cards */
+        .card { border-radius: 18px; padding: 34px 34px 32px; background: #fff; border: 1px solid var(--cream-2); box-shadow: 0 18px 40px -28px rgba(8,43,56,.5); }
+        .slide--dark .card { background: rgba(255,255,255,.035); border: 1px solid var(--line-on-ink); box-shadow: none; }
+        .card .num { font-family: var(--font-mono); font-size: 19px; font-weight: 600; color: #fff; background: var(--teal-deep); width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; border-radius: 11px; }
+        .slide--dark .card .num { background: var(--teal-deep); color: var(--ink); }
+        .card h3 { font-size: 27px; font-weight: 600; margin: 18px 0 10px; letter-spacing: -.3px; }
+        .card p { font-size: 20px; line-height: 1.42; color: var(--text-muted); }
+        .slide--dark .card p { color: var(--text-on-ink-muted); }
+        .card.hl { border-color: var(--orange); box-shadow: 0 18px 44px -26px rgba(255,122,51,.55); }
+        .card.hl .num { background: var(--orange); }
+
+        /* stat card */
+        .stat { text-align: left; }
+        .stat .v { font-size: 64px; font-weight: 700; letter-spacing: -2px; line-height: 1; color: var(--ink); }
+        .slide--dark .stat .v { color: var(--text-on-ink); }
+        .stat .v .u { font-size: 28px; color: var(--text-muted); font-weight: 500; }
+        .slide--dark .stat .v .u { color: var(--text-on-ink-muted); }
+        .stat .l { margin-top: 14px; font-family: var(--font-mono); font-size: 17px; letter-spacing: .5px; color: var(--text-muted); line-height: 1.4; }
+        .slide--dark .stat .l { color: var(--text-on-ink-muted); }
+        .stat .v.tv { color: var(--teal-deep); }
+        .slide--dark .stat .v.tv { color: var(--teal); }
+        .stat .v.ov { color: var(--orange); }
+
+        /* trend card — stat-led */
+        .card.trend { display: flex; flex-direction: column; }
+        .card.trend .trend-stat { display: flex; align-items: baseline; gap: 8px; }
+        .card.trend .trend-stat .v { font-size: 76px; font-weight: 700; letter-spacing: -3px; line-height: 1; color: var(--ink); }
+        .card.trend .trend-stat .v.tv { color: var(--teal-deep); }
+        .card.trend .trend-stat .v.ov { color: var(--orange); }
+        .card.trend .trend-stat .u { font-size: 26px; font-weight: 600; color: var(--text-muted); }
+        .card.trend .trend-unit { font-family: var(--font-mono); font-size: 15px; letter-spacing: .5px; text-transform: uppercase; color: var(--text-muted); margin: 10px 0 4px; }
+        .card.trend h3 { margin: 16px 0 8px; padding-top: 16px; border-top: 1px solid var(--cream-2); }
+
+        /* checklist / two-col */
+        .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-radius: 18px; overflow: hidden; border: 1px solid var(--cream-2); }
+        .pair > div { padding: 40px 44px; }
+        .pair .lft { background: #fff; }
+        .pair .rgt { background: linear-gradient(180deg, rgba(31,195,182,.08), rgba(31,195,182,.03)); border-left: 1px solid var(--cream-2); }
+        .pair h4 { font-family: var(--font-mono); font-size: 18px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 22px; }
+        .pair .lft h4 { color: var(--teal-deep); }
+        .pair .rgt h4 { color: var(--orange); }
+        .ck { list-style: none; display: flex; flex-direction: column; gap: 17px; }
+        .ck li { display: flex; gap: 15px; font-size: 21px; line-height: 1.35; color: var(--text-dark); }
+        .slide--dark .ck li { color: var(--text-on-ink); }
+        .ck li svg { flex: none; width: 25px; height: 25px; margin-top: 2px; stroke: var(--teal-deep); stroke-width: 2.4; fill: none; }
+        .pair .rgt .ck li svg { stroke: var(--orange); }
+
+        /* pills */
+        .pills { display: flex; flex-wrap: wrap; gap: 13px; }
+        .pill { font-family: var(--font-mono); font-size: 18px; letter-spacing: .5px; padding: 10px 18px; border-radius: 30px; background: rgba(31,195,182,.12); color: var(--teal-deep); border: 1px solid rgba(31,195,182,.3); }
+        .slide--dark .pill { background: rgba(31,195,182,.1); color: var(--teal); border-color: var(--line-on-ink); }
+
+        /* === SECTION DIVIDER === */
+        .divider .pad { justify-content: center; }
+        .divider .sec-no { font-family: var(--font-mono); font-size: 24px; letter-spacing: 6px; color: var(--orange); }
+        .divider h2 { font-size: 118px; margin: 22px 0 30px; max-width: 1400px; }
+        .divider .sub { font-size: 28px; color: var(--text-on-ink-muted); max-width: 1000px; line-height: 1.4; }
+        .divider .bar { width: 120px; height: 5px; background: var(--teal); border-radius: 3px; margin-bottom: 40px; }
+
+        /* === PLATFORM STACK === */
+        .stack { display: flex; flex-direction: column; gap: 14px; flex: 1; }
+        .layer { display: flex; align-items: center; gap: 28px; padding: 22px 30px; border-radius: 14px; border: 1px solid var(--line-on-ink); background: rgba(255,255,255,.035); }
+        .layer .tag { font-family: var(--font-mono); font-size: 17px; font-weight: 600; letter-spacing: 1px; color: var(--ink); background: var(--teal); padding: 8px 14px; border-radius: 8px; min-width: 132px; text-align: center; }
+        .layer .ld h3 { font-size: 25px; font-weight: 600; color: var(--text-on-ink); }
+        .layer .ld p { font-size: 18px; color: var(--text-on-ink-muted); margin-top: 4px; }
+        .layer.vpp { border-color: var(--orange); background: linear-gradient(90deg, rgba(255,122,51,.14), rgba(255,122,51,.04)); }
+        .layer.vpp .tag { background: var(--orange); }
+
+        /* === ARCHITECTURE === */
+        .arch { flex: 1; display: flex; flex-direction: column; gap: 0; position: relative; justify-content: center; }
+        .arch .tier { display: flex; justify-content: center; gap: 22px; position: relative; z-index: 2; }
+        .arch .conn { height: 30px; position: relative; }
+        .arch .node { background: rgba(255,255,255,.04); border: 1px solid var(--line-on-ink); border-radius: 12px; padding: 16px 26px; text-align: center; min-width: 200px; }
+        .arch .node .t { font-size: 21px; font-weight: 600; color: var(--text-on-ink); }
+        .arch .node .s { font-family: var(--font-mono); font-size: 15px; color: var(--text-on-ink-muted); margin-top: 3px; }
+        .arch .node.grid { border-color: var(--teal); }
+        .arch .node.der { border-color: var(--orange); background: rgba(255,122,51,.06); }
+        .arch .factory { display: flex; flex-direction: column; gap: 6px; padding: 14px; }
+        .arch .factory .chip { font-family: var(--font-mono); font-size: 14px; padding: 6px 8px; border-radius: 7px; }
+        .arch .platform-band { margin-top: 22px; border: 1px dashed var(--teal); border-radius: 12px; padding: 18px 26px; text-align: center; background: rgba(31,195,182,.06); }
+        .arch .platform-band .t { font-size: 22px; font-weight: 600; color: var(--teal); }
+        .arch .platform-band .s { font-size: 17px; color: var(--text-on-ink-muted); margin-top: 4px; }
+
+        /* === FLOW (zero-export, black start) === */
+        .flow { display: flex; align-items: stretch; gap: 0; flex-wrap: wrap; }
+        .flow .step { flex: 1; min-width: 0; background: #fff; border: 1px solid var(--cream-2); border-radius: 14px; padding: 26px 24px; }
+        .slide--dark .flow .step { background: rgba(255,255,255,.04); border-color: var(--line-on-ink); }
+        .flow .step .n { font-family: var(--font-mono); font-size: 16px; color: var(--orange); letter-spacing: 1px; }
+        .flow .step h3 { font-size: 22px; font-weight: 600; margin: 10px 0 6px; }
+        .slide--dark .flow .step h3 { color: var(--text-on-ink); }
+        .flow .step p { font-size: 18px; line-height: 1.35; color: var(--text-muted); }
+        .slide--dark .flow .step p { color: var(--text-on-ink-muted); }
+        .flow .arrow { display: flex; align-items: center; padding: 0 14px; color: var(--teal-deep); font-size: 30px; }
+        .slide--dark .flow .arrow { color: var(--teal); }
+
+        /* === ROADMAP GANTT === */
+        .gantt { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 12px;
+            background-image: linear-gradient(90deg, rgba(8,43,56,.07) 1px, transparent 1px);
+            background-size: 16.666% 100%; background-position: 0 0; padding-bottom: 8px; }
+        .gantt .row { position: relative; height: 92px; }
+        .gantt .bar { position: absolute; top: 0; bottom: 0; border-radius: 13px; padding: 0 28px;
+            display: flex; flex-direction: column; justify-content: center;
+            background: linear-gradient(90deg, rgba(31,195,182,.18), rgba(31,195,182,.07));
+            border: 1px solid rgba(14,139,134,.30); }
+        .gantt .bar .ph { font-family: var(--font-mono); font-size: 14px; letter-spacing: .5px; color: var(--teal-deep); }
+        .gantt .bar h3 { font-size: 25px; font-weight: 600; letter-spacing: -.4px; margin-top: 4px; white-space: nowrap; }
+        .gantt .bar.last { background: linear-gradient(90deg, rgba(255,122,51,.20), rgba(255,122,51,.06)); border-color: rgba(255,122,51,.42); }
+        .gantt .bar.last .ph { color: var(--orange); }
+        .gantt .axis { display: flex; justify-content: space-between; margin-top: 6px; font-family: var(--font-mono); font-size: 15px; color: var(--text-muted); border-top: 1px solid rgba(8,43,56,.14); padding-top: 10px; }
+
+        /* big quote */
+        .quote { font-size: 58px; font-weight: 600; line-height: 1.12; letter-spacing: -1px; max-width: 1500px; }
+        .quote .accent { color: var(--orange); }
+
+        /* === CONTROLS / HELPERS (engine) === */
+        .deck-controls { position: fixed; right: 26px; bottom: 22px; z-index: 1000; font-family: var(--font-mono); font-size: 14px; letter-spacing: 2px; color: var(--text-muted); background: rgba(255,255,255,.75); padding: 7px 14px; border-radius: 20px; backdrop-filter: blur(6px); }
+        .rail { position: fixed; left: 0; bottom: 0; height: 3px; background: var(--orange); z-index: 1000; transition: width .5s var(--ease); }
+        .fs-hint { position: fixed; right: 26px; bottom: 38px; z-index: 1001; display: inline-flex; align-items: center; gap: 9px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 1.5px; color: var(--text-muted); background: rgba(255,255,255,.78); padding: 9px 15px; border: 0; border-radius: 22px; cursor: pointer; backdrop-filter: blur(6px); box-shadow: 0 4px 18px rgba(0,0,0,.08); transition: opacity .5s var(--ease), transform .5s var(--ease); }
+        .fs-hint:hover { color: var(--text-dark); }
+        .fs-hint svg { width: 15px; height: 15px; stroke: currentColor; stroke-width: 2; fill: none; }
+        .fs-hint kbd { font: inherit; padding: 1px 6px; border-radius: 5px; background: rgba(0,0,0,.06); }
+        .fs-hint.hide { opacity: 0; transform: translateY(8px); pointer-events: none; }
+        .rotate-nudge { position: fixed; inset: 0; z-index: 1002; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; background: rgba(4,20,27,.93); color: var(--text-on-ink); backdrop-filter: blur(4px); font-family: var(--font-mono); font-size: 15px; letter-spacing: 1px; text-align: center; padding: 32px; transition: opacity .5s var(--ease); }
+        .rotate-nudge.hide { opacity: 0; pointer-events: none; }
+        .rotate-nudge svg { width: 52px; height: 52px; stroke: currentColor; stroke-width: 1.6; fill: none; animation: tilt 2.4s var(--ease) infinite; }
+        @keyframes tilt { 0%, 55%, 100% { transform: rotate(0); } 75%, 95% { transform: rotate(-90deg); } }
+        .rotate-nudge small { color: var(--text-on-ink-muted); letter-spacing: 1.5px; }
+        .tap-hint { position: fixed; top: 50%; z-index: 1001; transform: translateY(-50%); display: none; align-items: center; justify-content: center; width: 46px; height: 46px; border: 0; border-radius: 50%; color: var(--text-muted); background: rgba(255,255,255,.78); backdrop-filter: blur(6px); box-shadow: 0 4px 18px rgba(0,0,0,.08); transition: opacity .5s var(--ease); }
+        .tap-hint svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; }
+        .tap-hint--prev { left: 18px; }
+        .tap-hint--next { right: 18px; }
+        .tap-hint.show { display: inline-flex; }
+        .tap-hint.hide { opacity: 0; pointer-events: none; }
+
+        /* iPhone scroll-to-minimize */
+        .ios-spacer { display: none; }
+        html.ios-room, html.ios-room body { overflow: visible; height: auto; }
+        html.ios-room .ios-spacer { display: block; width: 1px; height: 100lvh; pointer-events: none; }
+
+        /* === REVEAL === */
+        .reveal { opacity: 0; transform: translateY(24px); transition: opacity var(--ease) .7s, transform var(--ease) .7s; }
+        .slide.visible .reveal { opacity: 1; transform: none; }
+        .slide.visible [data-d="1"] { transition-delay: .10s; }
+        .slide.visible [data-d="2"] { transition-delay: .20s; }
+        .slide.visible [data-d="3"] { transition-delay: .30s; }
+        .slide.visible [data-d="4"] { transition-delay: .40s; }
+        .slide.visible [data-d="5"] { transition-delay: .50s; }
+        .slide.visible [data-d="6"] { transition-delay: .60s; }
+
+        /* === FRAGMENTS (step-through reveal on advance) === */
+        .frag { opacity: 0; transform: translateY(16px); transition: opacity .5s var(--ease), transform .5s var(--ease); }
+        .frag.frag-in { opacity: 1; transform: none; }
+        .flow .arrow.frag { transform: scale(.5); }
+        .flow .arrow.frag.frag-in { transform: none; }
+
+        /* zero-export live enforcement meter */
+        .zx { margin-top: 16px; }
+        .zx .bar { position: relative; height: 12px; border-radius: 7px; background: rgba(255,122,51,.16); }
+        .zx .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 70%; border-radius: 7px; background: var(--teal); }
+        .slide.visible .frag-in .zx .fill { animation: zxpulse 3.8s var(--ease) infinite; }
+        .zx .lim { position: absolute; top: -5px; bottom: -5px; left: 70%; width: 2px; background: var(--orange); }
+        .zx .cap { display: flex; justify-content: space-between; margin-top: 9px; font-family: var(--font-mono); font-size: 13px; letter-spacing: .5px; color: var(--text-muted); }
+        @keyframes zxpulse {
+            0%   { width: 18%; background: var(--teal); }
+            34%  { width: 90%; background: var(--teal); }
+            46%  { width: 90%; background: var(--orange); }
+            64%  { width: 70%; background: var(--orange); }
+            78%  { width: 70%; background: var(--teal); }
+            100% { width: 18%; background: var(--teal); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .2s !important; }
+            .zx .fill { animation: none !important; width: 70% !important; }
+        }
+
+        @media print {
+            html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+            .deck-viewport, .deck-stage { position: static; width: auto; height: auto; transform: none !important; overflow: visible; }
+            .slide { position: relative; visibility: visible !important; opacity: 1 !important; width: 1920px; height: 1080px; break-after: page; page-break-after: always; }
+            .slide:last-child { break-after: auto; }
+            .frag { opacity: 1 !important; transform: none !important; }
+            .zx .fill { animation: none !important; }
+            .deck-controls, .rail, .fs-hint, .rotate-nudge, .tap-hint { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="deck-viewport">
+        <main class="deck-stage" id="deckStage">
+
+            <!-- 1 · TITLE -->
+            <section class="slide slide--dark slide--grid active">
+                <div class="pad" style="justify-content:center">
+                    <div class="kicker reveal" data-d="1">Survalent APAC · Confidential</div>
+                    <h1 class="reveal" data-d="2" style="font-size:96px;margin-top:28px">SurvalentONE<br>ADMS + <em>DERMS</em></h1>
+                    <p class="reveal" data-d="3" style="font-size:34px;color:var(--text-on-ink-muted);margin-top:30px;max-width:1240px">Smart Grid, Microgrid &amp; Energy Management for the VSIP 4 Industrial Park</p>
+                    <div class="reveal" data-d="4" style="margin-top:58px">
+                        <div style="font-family:var(--font-mono);font-size:13px;letter-spacing:2px;color:var(--orange);margin-bottom:12px">PRESENTING</div>
+                        <div style="font-size:38px;font-weight:600;letter-spacing:-.6px">Andrew Cruz</div>
+                        <div style="font-family:var(--font-mono);font-size:17px;letter-spacing:.5px;color:var(--teal);margin-top:6px">Solutions Consultant · Survalent APAC</div>
+                        <div style="display:flex;gap:54px;margin-top:32px;flex-wrap:wrap">
+                            <div><div style="font-size:20px;font-weight:600">Max Woo</div><div style="font-family:var(--font-mono);font-size:14px;letter-spacing:.5px;color:var(--text-on-ink-muted);margin-top:4px">Senior Regional Director, APAC</div></div>
+                            <div><div style="font-size:20px;font-weight:600">Rudy Thiara</div><div style="font-family:var(--font-mono);font-size:14px;letter-spacing:.5px;color:var(--text-on-ink-muted);margin-top:4px">Solutions Specialist</div></div>
+                        </div>
+                    </div>
+                    <div class="foot reveal" data-d="5">Survalent APAC · June 26, 2026 · 9:00 AM · VSIP I Office · Confidential</div>
+                </div>
+            </section>
+
+            <!-- 2 · INDUSTRY TRENDS -->
+            <section class="slide slide--light">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Industry Trends</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:56px;margin:20px 0 18px">The ground is shifting under industrial power</h2>
+                    <p class="lede reveal" data-d="2" style="margin-bottom:46px">Three forces are reshaping how industrial parks are powered — and VSIP 4 sits at their intersection.</p>
+                    <div class="grid g3" style="flex:1;align-content:stretch">
+                        <div class="card trend reveal" data-d="3">
+                            <div class="trend-stat"><span class="v ov" data-count="2050">2050</span></div>
+                            <div class="trend-unit">Vietnam's net-zero deadline</div>
+                            <h3>Decarbonization is policy</h3>
+                            <p>A national commitment and global ESG standards make a zero-carbon park a requirement — not a differentiator.</p>
+                        </div>
+                        <div class="card trend reveal" data-d="4">
+                            <div class="trend-stat"><span class="v tv" data-count="187">187</span><span class="u">MW</span></div>
+                            <div class="trend-unit">On-site solar VSIP 4 will host</div>
+                            <h3>Energy is going distributed</h3>
+                            <p>Rooftop solar, BESS, and EVs turn a passive grid into a two-way network that has to be actively managed.</p>
+                        </div>
+                        <div class="card trend reveal" data-d="5">
+                            <div class="trend-stat"><span class="v">~200</span><span class="u">MW</span></div>
+                            <div class="trend-unit">Premium load that can't blink</div>
+                            <h3>Reliability is a tenant demand</h3>
+                            <p>Precision manufacturing can't tolerate outages — uninterrupted power is becoming a condition of tenancy.</p>
+                        </div>
+                    </div>
+                    <div class="foot reveal" data-d="6">VSIP 4's brief — green, smart, zero-carbon, highly reliable — is exactly this convergence.</div>
+                </div>
+            </section>
+
+            <!-- 3 · UTILITY CHALLENGES -->
+            <section class="slide slide--dark slide--grid">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">The Challenge for VSIP 4</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:50px;margin:20px 0 18px;max-width:1500px">187 MW of solar on a greenfield grid is hard to <span class="teal">operate</span></h2>
+                    <p class="lede reveal" data-d="2" style="margin-bottom:42px">Three problems every smart industrial park has to solve:</p>
+                    <div class="grid g3" style="flex:1;align-content:start">
+                        <div class="card reveal" data-d="3"><span class="num">1</span><h3>No DER visibility</h3><p>You can't see how distributed solar is impacting the 22kV network in real time.</p></div>
+                        <div class="card reveal" data-d="4"><span class="num">2</span><h3>Zero-export can't hold</h3><p>Enforcing export limits reliably needs live topology awareness — not spreadsheets.</p></div>
+                        <div class="card reveal" data-d="5"><span class="num">3</span><h3>Islanding fails</h3><p>Black start and island formation require tight SCADA + DERMS integration.</p></div>
+                    </div>
+                    <div class="foot reveal" data-d="6">These are grid-operations problems — they need a grid-operations platform.</div>
+                </div>
+            </section>
+
+            <!-- 4 · WHAT IS DERMS -->
+            <section class="slide slide--light">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">What is DERMS?</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:52px;margin:20px 0 16px">Distributed Energy Resource Management</h2>
+                    <p class="lede reveal" data-d="2" style="margin-bottom:46px">The control layer that turns thousands of distributed assets — solar, batteries, controllers — into one coordinated, dispatchable resource.</p>
+                    <div class="grid g3" style="flex:1;align-content:center">
+                        <div class="card reveal" data-d="3"><h3 class="teal">Monitor</h3><p>Real-time visibility of every DER's output, state, and impact on the grid.</p></div>
+                        <div class="card reveal" data-d="4"><h3 class="teal">Optimize</h3><p>Decide the best action — curtail, charge, discharge — against grid limits and objectives.</p></div>
+                        <div class="card reveal" data-d="5"><h3 class="teal">Control</h3><p>Send commands closed-loop, enforcing limits like zero-export automatically.</p></div>
+                    </div>
+                    <div class="foot reveal" data-d="6">ADMS runs the wires. DERMS runs the energy resources on them. VSIP 4 needs both.</div>
+                </div>
+            </section>
+
+            <!-- 5 · PRODUCT OVERVIEW (stack) -->
+            <section class="slide slide--dark slide--grid">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Product Overview · SurvalentONE</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:48px;margin:18px 0 30px">One platform, five layers</h2>
+                    <div style="display:flex;gap:40px;flex:1">
+                        <div class="stack" style="flex:1.7">
+                            <div class="layer reveal" data-d="1"><span class="tag">SCADA</span><div class="ld"><h3>Real-time acquisition</h3><p>Live data from every device on the network</p></div></div>
+                            <div class="layer reveal" data-d="2"><span class="tag">ADMS</span><div class="ld"><h3>Topology · OMS · FLISR · Volt/VAR</h3><p>Operate and self-heal the 22kV distribution network</p></div></div>
+                            <div class="layer reveal" data-d="3"><span class="tag">DERMS</span><div class="ld"><h3>RTS monitoring · curtailment · zero-export · forecasting</h3><p>Manage 187 MW of solar against grid limits</p></div></div>
+                            <div class="layer reveal" data-d="4"><span class="tag">Microgrid</span><div class="ld"><h3>BESS dispatch · islanding · black start</h3><p>Local controllers at factory level</p></div></div>
+                            <div class="layer vpp reveal" data-d="5"><span class="tag">VPP</span><div class="ld"><h3>SurvalentONE <span class="accent">is</span> the VPP</h3><p>Aggregation, optimization, and dispatch of RTS + BESS</p></div></div>
+                        </div>
+                        <div class="reveal" data-d="6" style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:18px">
+                            <p style="font-family:var(--font-mono);font-size:17px;letter-spacing:1.5px;color:var(--text-on-ink-muted);text-transform:uppercase">Speaks every protocol</p>
+                            <div class="pills">
+                                <span class="pill">IEC-104</span><span class="pill">Modbus</span><span class="pill">IEC 61850</span>
+                                <span class="pill">DNP3</span><span class="pill">IEEE 2030.5</span><span class="pill">REST API</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6 · ARCHITECTURE -->
+            <section class="slide slide--dark slide--grid">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Recommended Architecture · Conceptual</span></div>
+                    <div class="arch">
+                        <div class="tier reveal" data-d="1">
+                            <div class="node grid"><div class="t">National Grid</div><div class="s">110kV connection</div></div>
+                        </div>
+                        <div class="conn"></div>
+                        <div class="tier reveal" data-d="2">
+                            <div class="node grid"><div class="t">Substation A</div><div class="s">110/22kV</div></div>
+                            <div class="node grid"><div class="t">Substation B</div><div class="s">110/22kV</div></div>
+                            <div class="node grid"><div class="t">Substation C</div><div class="s">110/22kV</div></div>
+                        </div>
+                        <div class="conn"></div>
+                        <div class="tier reveal" data-d="3" style="align-items:stretch">
+                            <div class="node factory"><div class="t" style="margin-bottom:6px">Factory node ×N</div><div class="chip" style="background:rgba(255,122,51,.14);color:var(--orange-soft)">RTS solar</div><div class="chip" style="background:rgba(255,122,51,.14);color:var(--orange-soft)">Local BESS</div><div class="chip" style="background:rgba(31,195,182,.14);color:var(--teal)">Microgrid Controller</div></div>
+                            <div class="node factory"><div class="t" style="margin-bottom:6px">Factory node ×N</div><div class="chip" style="background:rgba(255,122,51,.14);color:var(--orange-soft)">RTS solar</div><div class="chip" style="background:rgba(255,122,51,.14);color:var(--orange-soft)">Local BESS</div><div class="chip" style="background:rgba(31,195,182,.14);color:var(--teal)">Microgrid Controller</div></div>
+                            <div class="node factory"><div class="t" style="margin-bottom:6px">22kV feeders</div><div class="chip" style="background:rgba(255,255,255,.06);color:var(--text-on-ink-muted)">Reclosers</div><div class="chip" style="background:rgba(255,255,255,.06);color:var(--text-on-ink-muted)">LBS</div><div class="chip" style="background:rgba(255,255,255,.06);color:var(--text-on-ink-muted)">RMUs</div></div>
+                        </div>
+                        <div class="platform-band reveal" data-d="4">
+                            <div class="t">SurvalentONE ADMS + DERMS — central intelligence layer</div>
+                            <div class="s">Connects to every node · BESS is distributed — each factory is a self-sustaining microgrid</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7 · CORE CAPABILITIES -->
+            <section class="slide slide--light">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Core Capabilities</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:54px;margin:20px 0 40px">What the platform does</h2>
+                    <div class="grid g3" style="flex:1;align-content:center">
+                        <div class="card hl reveal" data-d="1"><span class="num">A</span><h3>ADMS</h3><p>Grid topology, FLISR self-healing, real-time distribution operations.</p></div>
+                        <div class="card hl reveal" data-d="2"><span class="num">D</span><h3>DERMS</h3><p>RTS generation management, curtailment, zero-export enforcement.</p></div>
+                        <div class="card reveal" data-d="3"><span class="num">M</span><h3>Microgrid + BESS</h3><p>Distributed BESS dispatch and local island formation per factory.</p></div>
+                        <div class="card reveal" data-d="4"><span class="num">I</span><h3>Multi-vendor integration</h3><p>IEC-104, Modbus, DNP3, IEC 61850 across every asset class.</p></div>
+                        <div class="card reveal" data-d="5"><span class="num">S</span><h3>Industrial cybersecurity</h3><p>OT-grade security designed in from day one, not patched later.</p></div>
+                        <div class="card reveal" data-d="6"><span class="num">V</span><h3>Built-in VPP</h3><p>Aggregates and dispatches RTS + BESS as a virtual power plant.</p></div>
+                    </div>
+                    <div class="foot reveal" data-d="6">ADMS and DERMS are the immediate priorities — the rest layers on as VSIP 4 grows.</div>
+                </div>
+            </section>
+
+            <!-- 8 · FORECASTING -->
+            <section class="slide slide--dark slide--grid">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Forecasting</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:52px;margin:20px 0 16px">You can't dispatch what you can't predict</h2>
+                    <p class="lede reveal" data-d="2" style="margin-bottom:46px">SurvalentONE forecasts generation and load so the system acts ahead of events — not after them.</p>
+                    <div class="grid g3" style="flex:1;align-content:center">
+                        <div class="card reveal" data-d="3"><h3 class="teal">Solar generation</h3><p>Irradiance and asset models predict RTS output hours ahead.</p></div>
+                        <div class="card reveal" data-d="4"><h3 class="teal">Load demand</h3><p>Park demand profiles anticipate peaks before they arrive.</p></div>
+                        <div class="card reveal" data-d="5"><h3 class="teal">Net position</h3><p>Combines both to pre-position BESS for zero-export and peak-shaving.</p></div>
+                    </div>
+                    <div class="foot reveal" data-d="6">Forecasting is what makes curtailment smooth and BESS dispatch economical — not reactive.</div>
+                </div>
+            </section>
+
+            <!-- 9 · OPTIMIZATION -->
+            <section class="slide slide--light">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Optimization</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:52px;margin:20px 0 16px">Every asset, working toward one objective</h2>
+                    <p class="lede reveal" data-d="2" style="margin-bottom:46px">DERMS continuously solves a single problem: meet load, respect grid limits, minimize cost, preserve battery life.</p>
+                    <div class="grid g3" style="flex:1;align-content:center">
+                        <div class="card reveal" data-d="3"><span class="num">1</span><h3>Peak shaving</h3><p>Discharge BESS at demand peaks to cut grid draw and demand charges.</p></div>
+                        <div class="card reveal" data-d="4"><span class="num">2</span><h3>Solar smoothing &amp; storage</h3><p>Absorb excess RTS into local BESS instead of curtailing it away.</p></div>
+                        <div class="card reveal" data-d="5"><span class="num">3</span><h3>Volt/VAR &amp; stability</h3><p>Hold voltage and power quality across the 22kV network automatically.</p></div>
+                    </div>
+                    <div class="foot reveal" data-d="6">Optimization is where reliability, cost, and sustainability stop competing and start compounding.</div>
+                </div>
+            </section>
+
+            <!-- 10 · DISPATCH & CONTROL (zero-export) -->
+            <section class="slide slide--light">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Dispatch &amp; Control · Zero-Export</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:50px;margin:20px 0 14px">A regulatory obligation, enforced in real time</h2>
+                    <p class="lede reveal" data-d="2" style="margin-bottom:40px">VSIP owns the RTS — so curtailment is direct, with no tenant permission needed.</p>
+                    <div class="flow" style="margin-bottom:auto">
+                        <div class="step frag" data-fg="1"><div class="n">01</div><h3>RTS generation</h3><p>187 MW of solar producing across the park.</p></div>
+                        <div class="arrow frag" data-fg="2">→</div>
+                        <div class="step frag" data-fg="2"><div class="n">02</div><h3>POI measurement</h3><p>Live metering at the point of interconnection.</p></div>
+                        <div class="arrow frag" data-fg="3">→</div>
+                        <div class="step frag" data-fg="3"><div class="n">03</div><h3>DERMS compares</h3><p>Checks export against the grid limit continuously.</p></div>
+                        <div class="arrow frag" data-fg="4">→</div>
+                        <div class="step hl frag" data-fg="4" style="border-color:var(--orange)"><div class="n">04</div><h3>Enforce</h3><p>Curtail RTS · charge local BESS · alert operator.</p>
+                            <div class="zx"><div class="bar"><div class="fill"></div><div class="lim"></div></div><div class="cap"><span>Export to grid</span><span style="color:var(--orange)">Limit — held</span></div></div>
+                        </div>
+                    </div>
+                    <p class="quote frag" data-fg="5" style="font-size:40px;margin-top:46px;max-width:1500px">Zero export is not a feature. It's a <span class="accent">regulatory obligation</span> — designed in from day one.</p>
+                </div>
+            </section>
+
+            <!-- 11 · USE CASES -->
+            <section class="slide slide--dark slide--grid">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Use Cases · VSIP 4 Scenarios</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:52px;margin:20px 0 40px">Three scenarios VSIP named — one platform</h2>
+                    <div class="grid g3" style="flex:1;align-content:center">
+                        <div class="card reveal" data-d="2"><span class="num">1</span><h3>Normal operations</h3><p>Maintain grid stability as 187 MW of solar fluctuates across the day — ADMS + Volt/VAR hold the network.</p></div>
+                        <div class="card reveal" data-d="3"><span class="num">2</span><h3>Peak &amp; zero-export</h3><p>Shave peaks and enforce strict zero-export — curtail RTS or charge local BESS, in real time.</p></div>
+                        <div class="card hl reveal" data-d="4"><span class="num">3</span><h3>Islanding &amp; black start</h3><p>Grid trips → factories island on local BESS → black start restores loads by priority → DERMS coordinates park-wide. <span class="accent">Tenants never lose power.</span></p></div>
+                    </div>
+                    <div class="foot reveal" data-d="5">These came straight from VSIP's brief. The architecture we recommend solves all three.</div>
+                </div>
+            </section>
+
+            <!-- 12 · BENEFITS -->
+            <section class="slide slide--light">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Benefits</span></div>
+                    <p class="quote reveal" data-d="2" style="margin:24px 0 50px">VSIP 4 is not just an industrial park. It's a <span class="accent">platform for the energy future</span> of Vietnamese industry.</p>
+                    <div class="grid g3" style="margin-top:auto">
+                        <div class="card reveal" data-d="3"><h3 class="teal">Reliability</h3><p>Premium tenants never lose power — resilience engineered into the grid, not bolted on.</p></div>
+                        <div class="card reveal" data-d="4"><h3 class="teal">Sustainability</h3><p>Zero carbon, ESG-ready. 187 MW of solar, managed to zero-export obligations.</p></div>
+                        <div class="card reveal" data-d="5"><h3 class="teal">Intelligence</h3><p>Data-driven and automated — architected for 50 years of load and DER growth.</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 13 · DIFFERENTIATORS -->
+            <section class="slide slide--dark slide--grid">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Why Survalent</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:52px;margin:20px 0 40px">Built for the control room — not retrofitted for it</h2>
+                    <div class="grid g3" style="flex:1;align-content:center">
+                        <div class="card reveal" data-d="2"><span class="num">1</span><h3>Grid-first by origin</h3><p>An ADMS/SCADA heritage — DERMS sits on real network topology, not a market model.</p></div>
+                        <div class="card reveal" data-d="3"><span class="num">2</span><h3>Proven in 24/7 utilities</h3><p>The same platform runs Vietnam's largest utility — 2.72M meters in production.</p></div>
+                        <div class="card reveal" data-d="4"><span class="num">3</span><h3>Open &amp; multi-vendor</h3><p>IEC-104, Modbus, DNP3, 61850, 2030.5 — vendor-agnostic, no lock-in.</p></div>
+                    </div>
+                    <div class="foot reveal" data-d="5">Many platforms aggregate DERs. Few were born running distribution grids — that's the difference.</div>
+                </div>
+            </section>
+
+            <!-- 14 · CYBERSECURITY -->
+            <section class="slide slide--light">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Cybersecurity</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:52px;margin:20px 0 16px">OT-grade security, designed in from day one</h2>
+                    <p class="lede reveal" data-d="2" style="margin-bottom:46px">A greenfield build is the one chance to make security architectural — not a patch applied later.</p>
+                    <div class="grid g3" style="flex:1;align-content:center">
+                        <div class="card reveal" data-d="3"><span class="num">1</span><h3>Defense in depth</h3><p>Segmented OT/IT zones, secured field communications, and a hardened control center.</p></div>
+                        <div class="card reveal" data-d="4"><span class="num">2</span><h3>Standards-aligned</h3><p>Built to the industrial OT security standards expected of critical infrastructure (e.g. IEC 62443).</p></div>
+                        <div class="card reveal" data-d="5"><span class="num">3</span><h3>Greenfield advantage</h3><p>No legacy systems to retrofit — a secure architecture from the very first device.</p></div>
+                    </div>
+                    <div class="foot reveal" data-d="6">For critical energy infrastructure, security isn't a feature line — it's a design constraint.</div>
+                </div>
+            </section>
+
+            <!-- 15 · CASE STUDY -->
+            <section class="slide slide--dark slide--grid">
+                <div class="pad" style="justify-content:center">
+                    <div class="kicker reveal" data-d="1">Case Study · Ho Chi Minh City</div>
+                    <div class="reveal" data-d="2" style="display:flex;gap:90px;align-items:baseline;margin:38px 0 30px;flex-wrap:wrap">
+                        <div><div data-count="95" data-suf="%" style="font-size:140px;font-weight:700;letter-spacing:-4px;line-height:.9;color:var(--teal)">95%</div><div class="l" style="font-family:var(--font-mono);font-size:22px;color:var(--text-on-ink-muted);margin-top:10px">SAIDI reduction</div></div>
+                        <div><div data-count="93" data-suf="%" style="font-size:140px;font-weight:700;letter-spacing:-4px;line-height:.9;color:var(--orange)">93%</div><div class="l" style="font-family:var(--font-mono);font-size:22px;color:var(--text-on-ink-muted);margin-top:10px">SAIFI reduction</div></div>
+                        <div><div data-count="2.72" data-dec="2" data-suf="M" style="font-size:140px;font-weight:700;letter-spacing:-4px;line-height:.9;color:var(--text-on-ink)">2.72M</div><div class="l" style="font-family:var(--font-mono);font-size:22px;color:var(--text-on-ink-muted);margin-top:10px">meters served</div></div>
+                    </div>
+                    <p class="reveal" data-d="3" style="font-size:34px;line-height:1.4;color:var(--text-on-ink-muted);max-width:1400px;margin-top:20px">The same SurvalentONE FLISR platform running <span class="teal">Vietnam's largest utility</span> can be architected for VSIP 4's specific requirements.</p>
+                    <div class="foot reveal" data-d="4">Source: Survalent — Ho Chi Minh City FLISR deployment.</div>
+                </div>
+            </section>
+
+            <!-- 16 · IMPLEMENTATION -->
+            <section class="slide slide--light">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Implementation · Investment Phasing</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:50px;margin:20px 0 16px">One platform, designed up front — deployed in layers</h2>
+                    <p class="lede reveal" data-d="2" style="margin-bottom:42px">VSIP wants the full ecosystem in 2–3 years, not a string of standalone projects. The first 12 months determine the next 50 years.</p>
+                    <div class="grid g2" style="margin-bottom:auto">
+                        <div class="card reveal" data-d="3"><h3 class="teal">Foundation (Months 0–6)</h3><p>Comms backbone, OT security, and the data model — the choices that either unlock or constrain everything that follows.</p></div>
+                        <div class="card reveal" data-d="4"><h3 class="teal">Grid Intelligence (Months 4–12)</h3><p>ADMS goes live. Zero-export monitoring starts here — before full DERMS — so the obligation is covered early.</p></div>
+                    </div>
+                    <p class="quote reveal" data-d="5" style="font-size:38px;margin-top:46px;max-width:1550px">Get the data model, comms backbone, and OT security right in months 0–6. <span class="accent">Everything else depends on it.</span></p>
+                </div>
+            </section>
+
+            <!-- 17 · ROADMAP -->
+            <section class="slide slide--light">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Roadmap · 2–3 Year Delivery</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:48px;margin:18px 0 32px">Five capability layers, one platform</h2>
+                    <div class="gantt">
+                        <div class="row"><div class="bar frag" data-fg="1" style="left:0%;width:16.7%"><span class="ph">M0–6</span><h3>Foundation</h3></div></div>
+                        <div class="row"><div class="bar frag" data-fg="2" style="left:11.1%;width:22.2%"><span class="ph">M4–12</span><h3>Grid Intelligence</h3></div></div>
+                        <div class="row"><div class="bar frag" data-fg="3" style="left:27.8%;width:27.8%"><span class="ph">M10–20</span><h3>Renewable Integration</h3></div></div>
+                        <div class="row"><div class="bar frag" data-fg="4" style="left:44.4%;width:33.3%"><span class="ph">M16–28</span><h3>Microgrid &amp; Resilience</h3></div></div>
+                        <div class="row"><div class="bar last frag" data-fg="5" style="left:66.7%;width:33.3%"><span class="ph">M24–36</span><h3>Smart Energy Ecosystem</h3></div></div>
+                        <div class="axis" aria-hidden="true"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span><span>30</span><span>36</span></div>
+                    </div>
+                    <div class="foot frag" data-fg="6">Each layer starts before the last one finishes — one platform, designed together, deployed in overlapping waves. Built to grow for 50 years.</div>
+                </div>
+            </section>
+
+            <!-- 18 · NEXT STEPS -->
+            <section class="slide slide--dark slide--grid">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Next Steps</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:54px;margin:20px 0 44px">Four steps from here</h2>
+                    <div class="grid g2" style="margin-bottom:auto">
+                        <div class="card reveal" data-d="2"><span class="num">1</span><h3>Validate parameters</h3><p>Confirm and refine the design basis together — today.</p></div>
+                        <div class="card reveal" data-d="3"><span class="num">2</span><h3>Reference architecture document</h3><p>Survalent APAC delivers within two weeks.</p></div>
+                        <div class="card reveal" data-d="4"><span class="num">3</span><h3>Technical workshop</h3><p>Deep-dive with the VSIP engineering team.</p></div>
+                        <div class="card reveal" data-d="5"><span class="num">4</span><h3>Reference site visit</h3><p>See SurvalentONE running at scale.</p></div>
+                    </div>
+                    <p class="quote reveal" data-d="6" style="font-size:42px;margin-top:48px;max-width:1600px">We come as your <span class="accent">system architects</span> — to help you make decisions today you won't regret in 50 years.</p>
+                </div>
+            </section>
+
+            <!-- 19 · Q&A -->
+            <section class="slide slide--dark slide--grid">
+                <div class="pad" style="justify-content:center">
+                    <div class="kicker reveal" data-d="1">Discussion</div>
+                    <h1 class="reveal" data-d="2" style="font-size:104px;margin-top:26px">Let's design VSIP 4<br><em>together</em></h1>
+                    <p class="reveal" data-d="3" style="font-size:32px;color:var(--text-on-ink-muted);margin-top:30px;max-width:1300px">Questions, scenarios, what-ifs — this is the part that shapes the Q4 tender.</p>
+                    <div class="foot reveal" data-d="4">Andrew Cruz · Max Woo · Rudy Thiara — Survalent APAC · Thank you.</div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <div class="rail" id="rail"></div>
+    <div class="deck-controls" id="deckControls"></div>
+
+    <button class="fs-hint" id="fsHint" title="Fullscreen (F)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+        <span>Fullscreen</span><kbd>F</kbd>
+    </button>
+
+    <div class="rotate-nudge hide" id="rotateNudge">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        <div>Rotate for the full view</div>
+        <small>tap to dismiss</small>
+    </div>
+
+    <button class="tap-hint tap-hint--prev" id="tapPrev" aria-label="Previous slide">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+    </button>
+    <button class="tap-hint tap-hint--next" id="tapNext" aria-label="Next slide">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+    </button>
+
+    <div class="ios-spacer" aria-hidden="true"></div>
+
+    <script>
+        class SlidePresentation {
+            constructor() {
+                this.slides = document.querySelectorAll('.slide');
+                this.currentSlide = 0;
+                this.stage = document.getElementById('deckStage');
+                this.rail = document.getElementById('rail');
+                this.setupStageScale();
+                this.setupKeyboardNav();
+                this.setupTouchNav();
+                this.setupMouseWheel();
+                this.setupFsHint();
+                this.setupRotateNudge();
+                this.setupTapHints();
+                this.setupIosRoom();
+                this.setupGridFx();
+                this.showSlide(0);
+            }
+            setupStageScale() {
+                const vv = window.visualViewport;
+                const scale = () => {
+                    const w = (vv && vv.width) || window.innerWidth;
+                    const h = (vv && vv.height) || window.innerHeight;
+                    const f = Math.min(w / 1920, h / 1080);
+                    const x = (w - 1920 * f) / 2;
+                    const y = (h - 1080 * f) / 2;
+                    this.stage.style.transform = `translate(${x}px, ${y}px) scale(${f})`;
+                };
+                scale();
+                window.addEventListener('resize', scale);
+                window.addEventListener('orientationchange', scale);
+                if (vv) { vv.addEventListener('resize', scale); vv.addEventListener('scroll', scale); }
+            }
+            setupKeyboardNav() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); this.nextSlide(); }
+                    else if (e.key === 'ArrowLeft') { e.preventDefault(); this.prevSlide(); }
+                    else if (e.key === 'End') this.showSlide(this.slides.length - 1);
+                    else if (e.key === 'Home') this.showSlide(0);
+                    else if (e.key === 'f' || e.key === 'F') { e.preventDefault(); this.toggleFullscreen(); }
+                });
+            }
+            toggleFullscreen() {
+                if (!document.documentElement.requestFullscreen) return;
+                if (document.fullscreenElement) document.exitFullscreen();
+                else document.documentElement.requestFullscreen();
+            }
+            setupFsHint() {
+                const hint = document.getElementById('fsHint');
+                if (!hint) return;
+                if (!document.documentElement.requestFullscreen) { hint.remove(); return; }
+                let idle;
+                const refresh = () => {
+                    clearTimeout(idle);
+                    hint.classList.add('hide');
+                    if (document.fullscreenElement) return;
+                    idle = setTimeout(() => hint.classList.remove('hide'), 3000);
+                };
+                hint.addEventListener('click', () => this.toggleFullscreen());
+                ['mousemove', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, refresh));
+                document.addEventListener('fullscreenchange', refresh);
+                refresh();
+            }
+            setupRotateNudge() {
+                const nudge = document.getElementById('rotateNudge');
+                if (!nudge) return;
+                const touch = matchMedia('(pointer: coarse)').matches;
+                const isPhone = touch && Math.min(window.innerWidth, window.innerHeight) <= 480;
+                if (!isPhone) { nudge.remove(); return; }
+                let dismissed = false;
+                const sync = () => {
+                    const portrait = window.innerHeight > window.innerWidth;
+                    nudge.classList.toggle('hide', dismissed || !portrait);
+                };
+                nudge.addEventListener('click', () => { dismissed = true; sync(); });
+                window.addEventListener('resize', sync);
+                window.addEventListener('orientationchange', sync);
+                sync();
+            }
+            setupTapHints() {
+                const prev = document.getElementById('tapPrev'), next = document.getElementById('tapNext');
+                if (!prev || !next) return;
+                if (!matchMedia('(pointer: coarse)').matches) { prev.remove(); next.remove(); return; }
+                prev.classList.add('show'); next.classList.add('show');
+                let idle;
+                const reveal = () => {
+                    clearTimeout(idle);
+                    prev.classList.remove('hide'); next.classList.remove('hide');
+                    idle = setTimeout(() => { prev.classList.add('hide'); next.classList.add('hide'); }, 2500);
+                };
+                prev.addEventListener('click', () => { this.prevSlide(); reveal(); });
+                next.addEventListener('click', () => { this.nextSlide(); reveal(); });
+                ['touchstart', 'touchend'].forEach(ev => document.addEventListener(ev, reveal));
+                reveal();
+            }
+            setupIosRoom() {
+                const touch = matchMedia('(pointer: coarse)').matches;
+                const noFs = !document.documentElement.requestFullscreen;
+                if (touch && noFs) document.documentElement.classList.add('ios-room');
+            }
+            setupTouchNav() {
+                let sx = 0, sy = 0;
+                document.addEventListener('touchstart', (e) => {
+                    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+                });
+                document.addEventListener('touchend', (e) => {
+                    const t = e.changedTouches[0];
+                    if (Math.abs(t.clientX - sx) > 12 || Math.abs(t.clientY - sy) > 12) return;
+                    if (e.target.closest('button, a, .rotate-nudge')) return;
+                    if (t.clientX < window.innerWidth * 0.25) this.prevSlide();
+                    else this.nextSlide();
+                });
+            }
+            setupMouseWheel() {
+                let lock = false;
+                document.addEventListener('wheel', (e) => {
+                    if (lock) return;
+                    lock = true; setTimeout(() => lock = false, 600);
+                    if (e.deltaY > 0) this.nextSlide();
+                    if (e.deltaY < 0) this.prevSlide();
+                }, { passive: true });
+            }
+            setupGridFx() {
+                const W = 1920, H = 1080;
+                const TEAL = [31, 195, 182], ORANGE = [255, 122, 51];
+                const lerp = (a, b, t) => a + (b - a) * t;
+                const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+                const rnd = (a, b) => a + Math.random() * (b - a);
+                const ease = t => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+                const col = (t, a) => {
+                    const r = Math.round(lerp(TEAL[0], ORANGE[0], t));
+                    const g = Math.round(lerp(TEAL[1], ORANGE[1], t));
+                    const b = Math.round(lerp(TEAL[2], ORANGE[2], t));
+                    return `rgba(${r},${g},${b},${a})`;
+                };
+
+                // ===== GRID CONFIG — tweak these by hand (all fractions of W or H) =====
+                const GRID = {
+                    vpX:   0.92,   // vanishing point X (×W). >1 = off the right edge, <1 = pulled inward
+                    vpY:   0.30,   // vanishing point Y (×H). the horizon height — lower = flatter floor
+                    nearL: 0.02,   // near/bottom-edge LEFT x  (×W) — where the grid starts on the left
+                    nearR: 1.25,   // near/bottom-edge RIGHT x (×W) — >1 runs off the right edge
+                    yNear: 1.06,   // bottom plane (×H) — keep ≥1 so the nearest lane is off-screen
+                    yFar:  0.46,   // farthest visible lane (×H) — closer to vpY = deeper floor
+                    rows:  11,     // horizontal lanes
+                    cols:  9,      // converging verticals
+                    alpha: 0.22,   // line brightness (max, at the near plane)
+                    farFade: 1.6,  // how fast lines fade with distance (higher = vanish sooner)
+                    fadeL: 0.22,   // extra left screen-edge dissolve (0 = off)
+                };
+                // ======================================================================
+                const VPX = W * GRID.vpX, VPY = H * GRID.vpY;
+                const XL = W * GRID.nearL, XR = W * GRID.nearR;
+                const Y_NEAR = H * GRID.yNear, Y_FAR = H * GRID.yFar;
+                const ROWS = GRID.rows, VLINES = GRID.cols;
+                // fraction from near plane toward the vanishing point at a given screen y
+                const sAt = y => (Y_NEAR - y) / (Y_NEAR - VPY);
+                const laneY = t => lerp(Y_FAR, Y_NEAR, Math.pow(t, 1.55));
+                // geometry of a (possibly fractional) lane: its screen y and left/right ends
+                const laneGeom = fLane => {
+                    const y = laneY(fLane / (ROWS - 1)), s = sAt(y);
+                    return { y, xL: lerp(XL, VPX, s), xR: lerp(XR, VPX, s) };
+                };
+                // project a (col, row) grid coordinate — fractional ok — to screen space
+                const proj = (c, r) => {
+                    const y = laneY(r / (ROWS - 1)), s = sAt(y);
+                    const xb = lerp(XL, XR, c / (VLINES - 1));
+                    return { x: lerp(xb, VPX, s), y };
+                };
+                // ONE fade field for everything: 1 at the near plane → 0 at the far plane (by screen y)
+                const fadeAt = y => Math.pow(clamp((y - Y_FAR) / (Y_NEAR - Y_FAR), 0, 1), GRID.farFade);
+
+                // attach a canvas to every slide declaring the grid type
+                const targets = [];
+                this.slides.forEach(slide => {
+                    if (!slide.classList.contains('slide--grid')) return;
+                    const c = document.createElement('canvas');
+                    c.className = 'grid-fx'; c.width = W; c.height = H;
+                    slide.insertBefore(c, slide.firstChild);
+                    slide._gfx = c.getContext('2d');
+                    targets.push(slide);
+                });
+                if (!targets.length) return;
+
+                // particles travel along grid lines, turning sharply at intersections
+                const pickDir = p => {
+                    const opts = [];
+                    for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+                        if (p.c + dc < 0 || p.c + dc >= VLINES || p.r + dr < 0 || p.r + dr >= ROWS) continue;
+                        let w = 1.4;
+                        if (dc === p.dc && dr === p.dr) w = 3.2;            // prefer continuing straight
+                        else if (dc === -p.dc && dr === -p.dr) w = 0.25;    // rarely reverse
+                        opts.push({ dc, dr, w });
+                    }
+                    let tot = opts.reduce((a, o) => a + o.w, 0), x = Math.random() * tot;
+                    for (const o of opts) { x -= o.w; if (x <= 0) { p.dc = o.dc; p.dr = o.dr; return; } }
+                    const o = opts[opts.length - 1]; p.dc = o.dc; p.dr = o.dr;
+                };
+                const parts = [];
+                for (let i = 0; i < 8; i++) {
+                    const p = { c: Math.floor(rnd(0, VLINES)), r: Math.floor(rnd(0, ROWS)), dc: 0, dr: 0, t: Math.random(), dur: rnd(0.45, 0.75), depth: 0, trail: [] };
+                    pickDir(p); parts.push(p);
+                }
+
+                const drawGrid = (ctx) => {
+                    ctx.clearRect(0, 0, W, H);
+                    ctx.lineCap = 'round';
+                    // converging verticals
+                    for (let i = 0; i < VLINES; i++) {
+                        const xb = lerp(XL, XR, i / (VLINES - 1)), tint = clamp(xb / W, 0, 1);
+                        const x1 = lerp(xb, VPX, sAt(Y_NEAR)), x2 = lerp(xb, VPX, sAt(Y_FAR));
+                        const vg = ctx.createLinearGradient(x1, Y_NEAR, x2, Y_FAR);
+                        for (let p = 0; p <= 1; p += 0.25) vg.addColorStop(p, col(tint, GRID.alpha * fadeAt(lerp(Y_NEAR, Y_FAR, p))));
+                        ctx.strokeStyle = vg; ctx.lineWidth = 1.1;
+                        ctx.beginPath(); ctx.moveTo(x1, Y_NEAR); ctx.lineTo(x2, Y_FAR); ctx.stroke();
+                    }
+                    // receding horizontal lanes
+                    for (let i = 0; i < ROWS; i++) {
+                        const g = laneGeom(i), depth = i / (ROWS - 1);
+                        const a = GRID.alpha * fadeAt(g.y);   // same fade field as the verticals
+                        const grad = ctx.createLinearGradient(g.xL, 0, g.xR, 0);
+                        grad.addColorStop(0, col(clamp(g.xL / W, 0, 1), a));
+                        grad.addColorStop(1, col(clamp(g.xR / W, 0, 1), a));
+                        ctx.strokeStyle = grad; ctx.lineWidth = lerp(0.6, 1.5, depth);
+                        ctx.beginPath(); ctx.moveTo(g.xL, g.y); ctx.lineTo(g.xR, g.y); ctx.stroke();
+                    }
+                    // particles + trails — fade with the same field so they sit on the grid
+                    for (const p of parts) {
+                        for (let k = 1; k < p.trail.length; k++) {
+                            const s = p.trail[k - 1], e = p.trail[k], f = k / p.trail.length;
+                            ctx.strokeStyle = col(clamp(e.x / W, 0, 1), f * 0.5 * fadeAt(e.y));
+                            ctx.lineWidth = lerp(0.5, 2.2, f);
+                            ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(e.x, e.y); ctx.stroke();
+                        }
+                        const head = p.trail[p.trail.length - 1];
+                        if (head) {
+                            const tint = clamp(head.x / W, 0, 1), fd = fadeAt(head.y);
+                            ctx.fillStyle = col(tint, 0.85 * fd);
+                            ctx.shadowColor = col(tint, 0.85 * fd); ctx.shadowBlur = lerp(4, 11, p.depth) * fd;
+                            ctx.beginPath(); ctx.arc(head.x, head.y, lerp(1.2, 3.0, p.depth), 0, Math.PI * 2); ctx.fill();
+                            ctx.shadowBlur = 0;
+                        }
+                    }
+                    // extra dissolve at the left screen edge (the distance/top fades by depth already)
+                    if (GRID.fadeL) {
+                        ctx.globalCompositeOperation = 'destination-out';
+                        const g = ctx.createLinearGradient(0, 0, W * GRID.fadeL, 0);
+                        g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+                        ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+                        ctx.globalCompositeOperation = 'source-over';
+                    }
+                };
+
+                const advance = (p, dt) => {
+                    p.t += dt / p.dur;
+                    while (p.t >= 1) {                  // arrived at the next intersection — turn or continue
+                        p.c += p.dc; p.r += p.dr; p.t -= 1; p.dur = rnd(0.45, 0.75); pickDir(p);
+                    }
+                    const cc = p.c + p.dc * p.t, rr = p.r + p.dr * p.t;   // linear in grid space → sharp corners
+                    const pos = proj(cc, rr);
+                    p.depth = rr / (ROWS - 1);
+                    p.trail.push({ x: pos.x, y: pos.y });
+                    if (p.trail.length > 18) p.trail.shift();
+                };
+
+                if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                    targets.forEach(s => drawGrid(s._gfx));    // static lanes, no loop
+                    return;
+                }
+                let last = performance.now();
+                const loop = (now) => {
+                    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+                    for (const p of parts) advance(p, dt);
+                    const cur = this.slides[this.currentSlide];
+                    if (cur && cur._gfx && !document.hidden) drawGrid(cur._gfx);
+                    requestAnimationFrame(loop);
+                };
+                requestAnimationFrame(loop);
+            }
+            showSlide(index, opts = {}) {
+                const reveal = opts.reveal || 'all';
+                this.currentSlide = Math.max(0, Math.min(index, this.slides.length - 1));
+                this.slides.forEach((slide, i) => {
+                    const active = i === this.currentSlide;
+                    slide.classList.toggle('active', active);
+                    slide.classList.toggle('visible', active);
+                });
+                const cur = this.slides[this.currentSlide];
+                this.setFrags(cur, reveal);
+                this.animateCounts(cur);
+                this.updateControls();
+            }
+            setFrags(slide, mode) {
+                if (!slide) return;
+                slide.querySelectorAll('.frag').forEach(f => f.classList.toggle('frag-in', mode === 'all'));
+            }
+            animateCounts(slide) {
+                if (!slide) return;
+                const els = slide.querySelectorAll('[data-count]');
+                if (!els.length) return;
+                const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+                els.forEach(el => {
+                    const to = parseFloat(el.dataset.count);
+                    const dec = parseInt(el.dataset.dec || '0', 10);
+                    const pre = el.dataset.pre || '', suf = el.dataset.suf || '';
+                    const fmt = v => pre + v.toFixed(dec) + suf;
+                    if (reduce) { el.textContent = fmt(to); return; }
+                    const dur = 1200, t0 = performance.now();
+                    const tick = (now) => {
+                        const p = Math.min(1, (now - t0) / dur);
+                        el.textContent = fmt(to * (1 - Math.pow(1 - p, 3)));
+                        if (p < 1) requestAnimationFrame(tick);
+                    };
+                    requestAnimationFrame(tick);
+                });
+            }
+            nextSlide() {
+                const slide = this.slides[this.currentSlide];
+                const pending = slide ? Array.from(slide.querySelectorAll('.frag:not(.frag-in)')) : [];
+                if (pending.length) {
+                    const g = pending[0].dataset.fg;
+                    if (g === undefined) pending[0].classList.add('frag-in');
+                    else pending.filter(f => f.dataset.fg === g).forEach(f => f.classList.add('frag-in'));
+                    return;
+                }
+                this.showSlide(this.currentSlide + 1, { reveal: 'none' });
+            }
+            prevSlide() {
+                const slide = this.slides[this.currentSlide];
+                const shown = slide ? Array.from(slide.querySelectorAll('.frag.frag-in')) : [];
+                if (shown.length) {
+                    const last = shown[shown.length - 1];
+                    const g = last.dataset.fg;
+                    if (g === undefined) last.classList.remove('frag-in');
+                    else shown.filter(f => f.dataset.fg === g).forEach(f => f.classList.remove('frag-in'));
+                    return;
+                }
+                this.showSlide(this.currentSlide - 1, { reveal: 'all' });
+            }
+            updateControls() {
+                const c = document.getElementById('deckControls');
+                if (c) c.textContent = String(this.currentSlide + 1).padStart(2, '0') + ' / ' + String(this.slides.length).padStart(2, '0');
+                if (this.rail) this.rail.style.width = ((this.currentSlide + 1) / this.slides.length * 100) + 'vw';
+            }
+        }
+        new SlidePresentation();
+    </script>
+</body>
+</html>

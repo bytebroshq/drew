@@ -3,7 +3,7 @@
 **Deck**: `vsip4-strategy.html`
 **Presenter**: Andrew Cruz (Senior Consultant, Survalent APAC)
 **Meeting**: June 26, 2026 · 9:00 AM · VSIP I Office
-**Team**: Andrew, Rudy (Consultant), Max (Sales) · Local partner: MP
+**Team**: Max Woo (Senior Regional Director, APAC) · Andrew Cruz (Solutions Consultant, presenting) · Rudy Thiara (Solutions Specialist) · Local partner: MP
 
 ---
 
