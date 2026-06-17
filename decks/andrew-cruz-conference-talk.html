@@ -77,6 +77,11 @@
         .net-halo { fill: none; stroke: var(--net-node); opacity: .45; animation: halo 3.4s ease-out infinite; }
         @keyframes halo { 0% { r: 4; opacity: .5; } 100% { r: 22; opacity: 0; } }
 
+        /* closing: nodes whose links form & dissolve at random around the sign-off */
+        .cn-link { stroke: var(--net-line); stroke-width: 1.5; opacity: 0; transition: opacity 1.2s ease; }
+        .cn-flow { stroke: var(--net-flow); stroke-width: 2; stroke-dasharray: 3 17; stroke-linecap: round;
+            opacity: 0; transition: opacity 1.2s ease; animation: flow 3.2s linear infinite; }
+
         /* === MONO KICKER / TELEMETRY === */
         .kicker {
             font-family: var(--font-mono); font-size: 19px; font-weight: 500;
@@ -358,7 +363,7 @@
 
             <!-- === SLIDE 7: CLOSING === -->
             <section class="slide slide--dark">
-                <svg class="net-bg net--dark" data-net="closing"></svg>
+                <svg class="net-bg net--dark closing-particles"></svg>
                 <div class="closing">
                     <div class="kicker reveal" data-d="1">// End of Line</div>
                     <h2 class="reveal" data-d="2" contenteditable>Thank You</h2>
@@ -436,15 +441,6 @@
                 ],
                 links: [[0,1],[1,2],[0,3],[3,1],
                     [4,5],[5,6],[6,7],[7,5],[7,8],[8,9],[9,10],[10,8]]
-            },
-            // slide 7: a perimeter ring of flowing energy enclosing the centered
-            // sign-off — a visual "end of line" that frames the thank-you.
-            closing: {
-                nodes: [
-                    [210,200],[560,150],[960,130],[1360,150],[1710,200],[1830,500],
-                    [1710,840],[1360,910],[960,930],[560,910],[210,840],[120,500]
-                ],
-                links: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[8,9],[9,10],[10,11],[11,0]]
             }
         };
         const SVGNS = "http://www.w3.org/2000/svg";
@@ -479,7 +475,71 @@
                 svg.appendChild(node);
             });
         }
-        document.querySelectorAll(".net-bg").forEach(buildNetwork);
+        document.querySelectorAll(".net-bg:not(.closing-particles)").forEach(buildNetwork);
+
+        /* === CLOSING CONSTELLATION ===
+           The same node motif, but the links between nodes form and dissolve at
+           random — a network quietly wiring itself around the sign-off. Nodes sit
+           outside a keep-clear box so the text stays legible. */
+        function buildConstellation(svg) {
+            svg.setAttribute("viewBox", "0 0 1920 1080");
+            const SAFE = { x1: 470, y1: 220, x2: 1450, y2: 860 };
+            // scatter nodes around the margins, clear of the centered text
+            const NODES = [];
+            const tries = 400;
+            for (let i = 0; i < tries && NODES.length < 18; i++) {
+                const x = 90 + Math.random() * 1740, y = 90 + Math.random() * 900;
+                if (x > SAFE.x1 && x < SAFE.x2 && y > SAFE.y1 && y < SAFE.y2) continue;
+                // keep nodes a little apart
+                if (NODES.some(n => Math.hypot(n[0] - x, n[1] - y) < 180)) continue;
+                NODES.push([x, y]);
+            }
+            NODES.forEach(([x, y], i) => {
+                const halo = document.createElementNS(SVGNS, "circle");
+                halo.setAttribute("class", "net-halo");
+                halo.setAttribute("cx", x); halo.setAttribute("cy", y); halo.setAttribute("r", 4);
+                halo.style.animationDelay = (i * 0.3) + "s";
+                svg.appendChild(halo);
+                const node = document.createElementNS(SVGNS, "circle");
+                node.setAttribute("class", "net-node");
+                node.setAttribute("cx", x); node.setAttribute("cy", y); node.setAttribute("r", 5);
+                svg.appendChild(node);
+            });
+
+            // randomly wire two nearby nodes, let the link live briefly, then fade it out
+            function spawnLink() {
+                const a = Math.floor(Math.random() * NODES.length);
+                // prefer a reasonably close partner so lines don't sprawl across the text
+                let b = a, best = Infinity;
+                for (let k = 0; k < 5; k++) {
+                    const c = Math.floor(Math.random() * NODES.length);
+                    if (c === a) continue;
+                    const d = Math.hypot(NODES[a][0] - NODES[c][0], NODES[a][1] - NODES[c][1]);
+                    if (d < best) { best = d; b = c; }
+                }
+                if (b === a) return;
+                const [x1, y1] = NODES[a], [x2, y2] = NODES[b];
+                const line = document.createElementNS(SVGNS, "line");
+                line.setAttribute("class", "cn-link");
+                const flow = document.createElementNS(SVGNS, "line");
+                flow.setAttribute("class", "cn-flow");
+                [line, flow].forEach(el => {
+                    el.setAttribute("x1", x1); el.setAttribute("y1", y1);
+                    el.setAttribute("x2", x2); el.setAttribute("y2", y2);
+                    svg.appendChild(el);
+                });
+                requestAnimationFrame(() => { line.style.opacity = ".9"; flow.style.opacity = ".85"; });
+                const life = 2600 + Math.random() * 3200;
+                setTimeout(() => {
+                    line.style.opacity = "0"; flow.style.opacity = "0";
+                    setTimeout(() => { line.remove(); flow.remove(); }, 1300);
+                }, life);
+            }
+            // keep a handful of links alive at any moment
+            for (let i = 0; i < 5; i++) setTimeout(spawnLink, i * 500);
+            setInterval(spawnLink, 1100);
+        }
+        document.querySelectorAll(".closing-particles").forEach(buildConstellation);
 
         /* === PRESENTATION ENGINE === */
         class SlidePresentation {
