@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Andrew Cruz — Conference Talk</title>
+
+    <!-- === Fonts === -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* === THEME === */
+        :root {
+            --cream: #f5f3f0;
+            --cream-2: #ece8e1;
+            --ink: #0b1530;
+            --ink-2: #0e1c3f;
+            --blue: #4361ee;
+            --blue-soft: #7c93f5;
+            --live: #00d68f;
+            --text-dark: #14182b;
+            --text-muted: #6b7186;
+            --text-on-ink: #eef1fb;
+            --text-on-ink-muted: #93a0c9;
+
+            --font-display: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+            --pad: 110px;
+            --ease: cubic-bezier(0.16, 1, 0.3, 1);
+            --dur: 0.7s;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* === MANDATORY VIEWPORT-BASE === */
+        html, body {
+            width: 100%; height: 100%;
+            margin: 0; overflow: hidden;
+            background: var(--ink);
+        }
+        .deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--ink); }
+        .deck-stage {
+            position: absolute; left: 0; top: 0;
+            width: 1920px; height: 1080px;
+            overflow: hidden; transform-origin: 0 0;
+        }
+        .slide {
+            position: absolute; inset: 0;
+            width: 1920px; height: 1080px;
+            overflow: hidden;
+            visibility: hidden; opacity: 0; pointer-events: none;
+            font-family: var(--font-display); color: var(--text-dark);
+            transition: opacity 0.5s var(--ease);
+        }
+        .slide.active, .slide.visible {
+            visibility: visible; opacity: 1; pointer-events: auto; z-index: 1;
+        }
+        img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+
+        /* === SURFACES === */
+        .slide--light { background: radial-gradient(120% 120% at 80% 0%, var(--cream) 0%, var(--cream-2) 100%); }
+        .slide--dark  { background: radial-gradient(120% 130% at 15% 0%, var(--ink-2) 0%, var(--ink) 70%); color: var(--text-on-ink); }
+
+        .pad { position: absolute; inset: 0; padding: var(--pad); z-index: 2; }
+
+        /* === NETWORK MOTIF (shared visual language) === */
+        .net-bg { position: absolute; inset: 0; width: 1920px; height: 1080px; z-index: 1; pointer-events: none; }
+        .net--light { --net-line: rgba(67,97,238,.16); --net-flow: #4361ee; --net-node: #4361ee; }
+        .net--dark  { --net-line: rgba(124,147,245,.22); --net-flow: #7c93f5; --net-node: #7c93f5; }
+        .net-line { stroke: var(--net-line); stroke-width: 1.5; }
+        .net-flow { stroke: var(--net-flow); stroke-width: 2; stroke-dasharray: 3 17; stroke-linecap: round; opacity: .85; animation: flow 3.2s linear infinite; }
+        @keyframes flow { to { stroke-dashoffset: -200; } }
+        .net-node { fill: var(--net-node); }
+        .net-halo { fill: none; stroke: var(--net-node); opacity: .45; animation: halo 3.4s ease-out infinite; }
+        @keyframes halo { 0% { r: 4; opacity: .5; } 100% { r: 22; opacity: 0; } }
+
+        /* === MONO KICKER / TELEMETRY === */
+        .kicker {
+            font-family: var(--font-mono); font-size: 19px; font-weight: 500;
+            letter-spacing: 3px; text-transform: uppercase; color: var(--blue);
+            display: inline-flex; align-items: center; gap: 14px;
+        }
+        .slide--dark .kicker { color: var(--blue-soft); }
+        .kicker::before {
+            content: ""; width: 10px; height: 10px; border-radius: 50%;
+            background: var(--live); box-shadow: 0 0 0 0 rgba(0,214,143,.6);
+            animation: pulseDot 2s ease-out infinite;
+        }
+        @keyframes pulseDot { 0% { box-shadow: 0 0 0 0 rgba(0,214,143,.5);} 70%{ box-shadow:0 0 0 12px rgba(0,214,143,0);} 100%{box-shadow:0 0 0 0 rgba(0,214,143,0);} }
+
+        .telemetry {
+            position: absolute; top: var(--pad); right: var(--pad);
+            font-family: var(--font-mono); font-size: 15px; letter-spacing: 1px;
+            color: var(--text-muted); text-align: right; line-height: 1.9; z-index: 3;
+        }
+        .slide--dark .telemetry { color: var(--text-on-ink-muted); }
+
+        .slide-no {
+            position: absolute; left: var(--pad); bottom: 56px;
+            font-family: var(--font-mono); font-size: 15px; letter-spacing: 2px;
+            color: var(--text-muted); z-index: 3;
+        }
+        .slide--dark .slide-no { color: var(--text-on-ink-muted); }
+
+        /* === TITLE === */
+        .title-wrap { position: absolute; left: var(--pad); bottom: 150px; right: var(--pad); }
+        .title-wrap h1 {
+            font-size: 108px; font-weight: 800; line-height: 1.04;
+            letter-spacing: -2.5px; margin: 26px 0 30px; max-width: 1480px;
+        }
+        .title-wrap h1 em { color: var(--blue-soft); font-style: normal; }
+        .byline { font-family: var(--font-mono); font-size: 22px; color: var(--text-on-ink-muted); letter-spacing: .5px; }
+        .byline b { color: var(--text-on-ink); font-weight: 700; }
+
+        /* === SECTION HEADING === */
+        .heading { font-size: 60px; font-weight: 700; line-height: 1.12; letter-spacing: -1px; margin-top: 22px; }
+        .heading.big { font-size: 72px; max-width: 1200px; }
+        .lead { font-size: 27px; line-height: 1.55; color: var(--text-muted); max-width: 760px; margin-top: 30px; font-weight: 500; }
+        .slide--dark .lead { color: var(--text-on-ink-muted); }
+        .lead b, .heading em { color: var(--blue); font-style: normal; }
+        .slide--dark .lead b { color: var(--blue-soft); }
+
+        /* === ABOUT (slide 2) === */
+        .about-grid { position: absolute; left: var(--pad); right: var(--pad); top: 300px; display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 90px; align-items: start; }
+        .about-bio { font-size: 26px; line-height: 1.6; color: var(--text-dark); }
+        .about-bio .role { font-family: var(--font-mono); font-size: 20px; color: var(--blue); margin-bottom: 26px; letter-spacing: .5px; }
+        .stat-stack { display: flex; flex-direction: column; gap: 30px; }
+        .stat { border-left: 4px solid var(--blue); padding-left: 26px; }
+        .stat .num { font-size: 64px; font-weight: 800; letter-spacing: -1.5px; line-height: 1; }
+        .stat .lbl { font-family: var(--font-mono); font-size: 16px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-top: 10px; }
+
+        /* === FOCUS (slide 3) — connected nodes === */
+        .focus-track { position: absolute; left: var(--pad); right: var(--pad); top: 480px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 70px; }
+        .focus-track::before { content: ""; position: absolute; top: 30px; left: 30px; right: 30px; height: 2px; background: repeating-linear-gradient(90deg, var(--blue) 0 8px, transparent 8px 22px); opacity: .5; }
+        .fcard { position: relative; }
+        .fnode { width: 60px; height: 60px; border-radius: 50%; background: var(--cream); border: 2px solid var(--blue); color: var(--blue); display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-weight: 700; font-size: 22px; position: relative; z-index: 2; }
+        .fcard h3 { font-size: 30px; font-weight: 700; margin: 30px 0 14px; letter-spacing: -.5px; }
+        .fcard p { font-size: 22px; line-height: 1.5; color: var(--text-muted); }
+
+        /* === TWO-COLUMN DIAGRAM SLIDES (4 & 5) === */
+        .split { position: absolute; inset: var(--pad); display: grid; grid-template-columns: 1fr 0.95fr; gap: 80px; align-items: center; }
+        .split .col-text { align-self: center; }
+
+        /* nested sets — SCADA ⊃ ADMS */
+        .sets { position: relative; width: 660px; height: 560px; margin: 0 auto; }
+        .set-outer { position: absolute; inset: 0; border: 2px dashed var(--blue); border-radius: 28px; }
+        .set-outer .tag { position: absolute; top: 26px; left: 30px; font-family: var(--font-mono); font-weight: 700; font-size: 22px; letter-spacing: 2px; color: var(--blue); }
+        .set-outer .sub { position: absolute; top: 60px; left: 30px; font-family: var(--font-mono); font-size: 15px; color: var(--text-muted); letter-spacing: 1px; }
+        .set-inner { position: absolute; left: 90px; right: 90px; bottom: 70px; height: 320px; background: var(--blue); color: #fff; border-radius: 22px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 30px 60px -20px rgba(67,97,238,.5); }
+        .set-inner .tag { font-family: var(--font-mono); font-weight: 700; font-size: 26px; letter-spacing: 3px; }
+        .set-inner .feat { font-family: var(--font-mono); font-size: 16px; letter-spacing: 1px; opacity: .9; margin-top: 16px; }
+        .set-note { text-align: center; font-family: var(--font-mono); font-size: 18px; color: var(--text-muted); margin-top: 26px; letter-spacing: 1px; }
+
+        /* GIS → ADMS data flow */
+        .flow { position: relative; width: 100%; height: 540px; }
+        .flow-row { position: absolute; top: 70px; left: 0; right: 0; display: flex; align-items: center; gap: 0; }
+        .fbox { flex: 0 0 auto; width: 240px; height: 180px; border-radius: 22px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .fbox .name { font-family: var(--font-mono); font-weight: 700; font-size: 30px; letter-spacing: 2px; }
+        .fbox .desc { font-family: var(--font-mono); font-size: 14px; letter-spacing: .5px; margin-top: 10px; opacity: .85; }
+        .fbox.gis { background: var(--cream); border: 2px solid var(--blue); color: var(--blue); }
+        .fbox.adms { background: var(--blue); color: #fff; box-shadow: 0 24px 50px -18px rgba(67,97,238,.5); }
+        .pipe { flex: 1; height: 8px; background: var(--cream-2); border-radius: 8px; position: relative; overflow: hidden; }
+        .pipe svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+        .downstream { position: absolute; top: 330px; right: 0; width: 240px; display: flex; flex-direction: column; gap: 16px; }
+        .chip { font-family: var(--font-mono); font-size: 17px; letter-spacing: .5px; padding: 14px 20px; border-radius: 12px; background: rgba(67,97,238,.08); border: 1px solid rgba(67,97,238,.25); color: var(--text-dark); display: flex; align-items: center; gap: 12px; }
+        .chip::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--blue); }
+        .branch { position: absolute; top: 250px; right: 110px; width: 2px; height: 80px; background: repeating-linear-gradient(180deg, var(--blue) 0 6px, transparent 6px 16px); opacity: .5; }
+
+        /* === METRICS DASHBOARD (slide 6) === */
+        .metrics { position: absolute; left: var(--pad); right: var(--pad); top: 320px; display: grid; grid-template-columns: 1fr 1fr; gap: 70px; }
+        .metric { border: 1px solid rgba(124,147,245,.28); border-radius: 24px; padding: 50px 56px; background: rgba(124,147,245,.05); position: relative; overflow: hidden; }
+        .metric .head { font-family: var(--font-mono); font-size: 18px; letter-spacing: 2px; color: var(--text-on-ink-muted); text-transform: uppercase; }
+        .metric .val { font-size: 132px; font-weight: 800; letter-spacing: -4px; line-height: 1; margin: 18px 0 8px; color: #fff; }
+        .metric .val .sign { color: var(--live); }
+        .metric .cap { font-size: 22px; color: var(--text-on-ink-muted); }
+        .metric .bar { position: absolute; left: 0; bottom: 0; height: 5px; background: var(--live); width: 0; transition: width 1.4s var(--ease) .2s; }
+        .metric.show .bar { width: var(--w); }
+        .metrics-foot { position: absolute; left: var(--pad); right: var(--pad); bottom: 110px; font-family: var(--font-mono); font-size: 20px; letter-spacing: 1px; color: var(--text-on-ink-muted); display: flex; gap: 50px; }
+        .metrics-foot b { color: #fff; font-weight: 700; }
+
+        /* === CLOSING (slide 7) === */
+        .closing { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; z-index: 2; }
+        .closing .kicker { margin-bottom: 34px; }
+        .closing h2 { font-size: 120px; font-weight: 800; letter-spacing: -3px; }
+        .closing .sign-off { font-size: 28px; color: var(--text-on-ink-muted); margin-top: 30px; line-height: 1.6; }
+        .closing .sign-off b { color: var(--text-on-ink); font-weight: 700; }
+        .closing .contact { font-family: var(--font-mono); font-size: 19px; letter-spacing: 1px; color: var(--blue-soft); margin-top: 40px; }
+
+        /* === REVEAL ANIMATIONS === */
+        .reveal, .reveal-left, .reveal-scale { opacity: 0; transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease); }
+        .reveal { transform: translateY(34px); }
+        .reveal-left { transform: translateX(-44px); }
+        .reveal-scale { transform: scale(.92); }
+        .slide.visible .reveal, .slide.visible .reveal-left, .slide.visible .reveal-scale { opacity: 1; transform: none; }
+        .slide.visible [data-d="1"] { transition-delay: .12s; }
+        .slide.visible [data-d="2"] { transition-delay: .24s; }
+        .slide.visible [data-d="3"] { transition-delay: .36s; }
+        .slide.visible [data-d="4"] { transition-delay: .48s; }
+        .slide.visible [data-d="5"] { transition-delay: .60s; }
+        .slide.visible [data-d="6"] { transition-delay: .72s; }
+
+        /* === EDIT MODE === */
+        .edit-hotzone { position: fixed; top: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }
+        .edit-toggle { position: fixed; top: 20px; left: 20px; width: 44px; height: 44px; background: var(--blue); color: #fff; border: none; border-radius: 50%; font-size: 20px; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity .3s ease; z-index: 10001; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(67,97,238,.3); }
+        .edit-toggle:hover { background: #3553d8; }
+        .edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+        [contenteditable]{ border-radius: 6px; }
+        .editing [contenteditable] { outline: 2px dashed var(--blue); outline-offset: 6px; background: rgba(67,97,238,.06); }
+        [contenteditable]:focus { outline-color: var(--blue); background: rgba(67,97,238,.12); }
+
+        /* === PROGRESS / CONTROLS === */
+        .deck-controls { position: fixed; right: 26px; bottom: 22px; z-index: 1000; font-family: var(--font-mono); font-size: 14px; letter-spacing: 2px; color: var(--text-muted); background: rgba(255,255,255,.75); padding: 7px 14px; border-radius: 20px; backdrop-filter: blur(6px); }
+        .rail { position: fixed; left: 0; bottom: 0; height: 3px; background: var(--blue); z-index: 1000; transition: width .5s var(--ease); }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .2s !important; }
+        }
+
+        /* === PRINT === */
+        @media print {
+            html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+            .deck-viewport, .deck-stage { position: static; width: auto; height: auto; transform: none !important; overflow: visible; }
+            .slide { position: relative; visibility: visible !important; opacity: 1 !important; width: 1920px; height: 1080px; break-after: page; page-break-after: always; }
+            .slide:last-child { break-after: auto; }
+            .deck-controls, .edit-toggle, .edit-hotzone, .rail { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="deck-viewport">
+        <main class="deck-stage" id="deckStage">
+
+            <!-- === SLIDE 1: TITLE === -->
+            <section class="slide slide--dark active">
+                <svg class="net-bg net--dark"></svg>
+                <div class="telemetry reveal" data-d="1">SURVALENT TECHNOLOGY<br>APAC · FIELD SOLUTIONS<br>● SYSTEM ONLINE</div>
+                <div class="title-wrap">
+                    <div class="kicker reveal" data-d="1">The Role of GIS in Modern Utility Operations</div>
+                    <h1 class="reveal" data-d="2" contenteditable>GIS: the single source of truth behind <em>smarter grids</em></h1>
+                    <p class="byline reveal" data-d="3"><b>Andrew Cruz</b> — Field Solutions Consultant, Survalent Technology</p>
+                </div>
+                <div class="slide-no">01 / 07</div>
+            </section>
+
+            <!-- === SLIDE 2: OPERATOR PROFILE === -->
+            <section class="slide slide--light">
+                <svg class="net-bg net--light"></svg>
+                <div class="pad">
+                    <div class="kicker reveal" data-d="1">// Operator Profile</div>
+                    <h2 class="heading reveal" data-d="2" contenteditable>Andrew Cruz</h2>
+                    <div class="about-grid">
+                        <div class="about-bio reveal-left" data-d="3">
+                            <div class="role">Field Solutions Consultant · Survalent</div>
+                            <p contenteditable>More than a decade turning complex grid challenges into business value across the APAC region — translating SCADA, ADMS, and energy-automation deployments into reliability operators can measure.</p>
+                        </div>
+                        <div class="stat-stack">
+                            <div class="stat reveal" data-d="3"><div class="num"><span class="counter" data-target="13">0</span>+</div><div class="lbl">Years in SCADA / ADMS</div></div>
+                            <div class="stat reveal" data-d="4"><div class="num"><span class="counter" data-target="12">0</span></div><div class="lbl">APAC markets served</div></div>
+                            <div class="stat reveal" data-d="5"><div class="num">L2</div><div class="lbl">Survalent SCADA Specialist</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide-no">02 / 07</div>
+            </section>
+
+            <!-- === SLIDE 3: TODAY'S FOCUS === -->
+            <section class="slide slide--light">
+                <svg class="net-bg net--light"></svg>
+                <div class="pad">
+                    <div class="kicker reveal" data-d="1">// Today's Focus</div>
+                    <h2 class="heading big reveal" data-d="2" contenteditable>As grids grow complex, resilience comes down to one thing: trustworthy data.</h2>
+                    <div class="focus-track">
+                        <div class="fcard reveal" data-d="3"><div class="fnode">01</div><h3 contenteditable>The distinction</h3><p contenteditable>Why every ADMS is SCADA — but not every SCADA is an ADMS.</p></div>
+                        <div class="fcard reveal" data-d="4"><div class="fnode">02</div><h3 contenteditable>The foundation</h3><p contenteditable>How GIS feeds the ADMS as the single source of truth.</p></div>
+                        <div class="fcard reveal" data-d="5"><div class="fnode">03</div><h3 contenteditable>The payoff</h3><p contenteditable>Reliability you can measure — proven at scale across APAC.</p></div>
+                    </div>
+                </div>
+                <div class="slide-no">03 / 07</div>
+            </section>
+
+            <!-- === SLIDE 4: SCADA ⊃ ADMS === -->
+            <section class="slide slide--light">
+                <svg class="net-bg net--light"></svg>
+                <div class="kicker reveal" data-d="1" style="position:absolute; left:var(--pad); top:var(--pad); z-index:3;">// The Distinction</div>
+                <div class="split">
+                    <div class="col-text">
+                        <h2 class="heading reveal" data-d="2" contenteditable>All ADMS platforms are SCADA. Not all SCADA platforms are ADMS.</h2>
+                        <p class="lead reveal" data-d="3" contenteditable>SCADA gives operators <b>visibility and control</b>. ADMS adds the intelligence on top — network modeling, advanced applications, and automation that turn raw telemetry into decisions.</p>
+                    </div>
+                    <div class="col-text">
+                        <div class="sets reveal-scale" data-d="3">
+                            <div class="set-outer"><div class="tag">SCADA</div><div class="sub">visibility · control · telemetry</div></div>
+                            <div class="set-inner"><div class="tag">ADMS</div><div class="feat">modeling · analytics · automation</div></div>
+                        </div>
+                        <div class="set-note reveal" data-d="4">ADMS ⊂ SCADA</div>
+                    </div>
+                </div>
+                <div class="slide-no">04 / 07</div>
+            </section>
+
+            <!-- === SLIDE 5: GIS → ADMS FLOW === -->
+            <section class="slide slide--light">
+                <svg class="net-bg net--light"></svg>
+                <div class="kicker reveal" data-d="1" style="position:absolute; left:var(--pad); top:var(--pad); z-index:3;">// The Foundation</div>
+                <div class="split">
+                    <div class="col-text">
+                        <h2 class="heading reveal" data-d="2" contenteditable>GIS is the single source of truth that feeds the ADMS.</h2>
+                        <p class="lead reveal" data-d="3" contenteditable>An accurate, connected network model starts in GIS. When that data flows cleanly downstream, every application inherits its integrity — <b>trusted data in, confident operations out</b>.</p>
+                    </div>
+                    <div class="col-text">
+                        <div class="flow reveal-scale" data-d="3">
+                            <div class="flow-row">
+                                <div class="fbox gis"><div class="name">GIS</div><div class="desc">single source of truth</div></div>
+                                <div class="pipe"><svg viewBox="0 0 100 8" preserveAspectRatio="none"><line class="net-flow" x1="0" y1="4" x2="100" y2="4" style="--net-flow:#4361ee;"></line></svg></div>
+                                <div class="fbox adms"><div class="name">ADMS</div><div class="desc">decisions &amp; automation</div></div>
+                            </div>
+                            <div class="branch"></div>
+                            <div class="downstream">
+                                <div class="chip">Load Flow</div>
+                                <div class="chip">Fault Analysis</div>
+                                <div class="chip">Service Restoration</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide-no">05 / 07</div>
+            </section>
+
+            <!-- === SLIDE 6: FIELD RESULTS (DASHBOARD) === -->
+            <section class="slide slide--dark">
+                <svg class="net-bg net--dark"></svg>
+                <div class="pad" style="padding-bottom:0;">
+                    <div class="kicker reveal" data-d="1">// Field Results — Ho Chi Minh City</div>
+                    <h2 class="heading reveal" data-d="2" style="color:#fff;" contenteditable>Reliability you can measure.</h2>
+                </div>
+                <div class="metrics">
+                    <div class="metric reveal" data-d="3" style="--w:95%;">
+                        <div class="head">SAIDI Reduction</div>
+                        <div class="val"><span class="sign">−</span><span class="counter" data-target="95">0</span>%</div>
+                        <div class="cap">outage duration, system-wide</div>
+                        <div class="bar"></div>
+                    </div>
+                    <div class="metric reveal" data-d="4" style="--w:93%;">
+                        <div class="head">SAIFI Reduction</div>
+                        <div class="val"><span class="sign">−</span><span class="counter" data-target="93">0</span>%</div>
+                        <div class="cap">outage frequency, system-wide</div>
+                        <div class="bar"></div>
+                    </div>
+                </div>
+                <div class="metrics-foot reveal" data-d="5">
+                    <span><b>2.72M</b> meters served</span>
+                    <span><b>SurvalentONE FLISR</b> — fault location, isolation &amp; restoration</span>
+                </div>
+                <div class="slide-no">06 / 07</div>
+            </section>
+
+            <!-- === SLIDE 7: CLOSING === -->
+            <section class="slide slide--dark">
+                <svg class="net-bg net--dark"></svg>
+                <div class="closing">
+                    <div class="kicker reveal" data-d="1">// End of Line</div>
+                    <h2 class="reveal" data-d="2" contenteditable>Thank You</h2>
+                    <p class="sign-off reveal" data-d="3" contenteditable>Let's build smarter, more reliable grids — together.<br><b>Andrew Cruz</b> · Survalent Technology</p>
+                    <p class="contact reveal" data-d="4" contenteditable>linkedin.com/in/andrewccruz · Questions?</p>
+                </div>
+                <div class="slide-no">07 / 07</div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- === EDIT MODE === -->
+    <div class="edit-hotzone"></div>
+    <button class="edit-toggle" id="editToggle" title="Edit mode (E)">✏️</button>
+    <div class="rail" id="rail"></div>
+
+    <script>
+        /* === SHARED NETWORK MOTIF === */
+        const NODES = [
+            [160,180],[380,320],[300,560],[520,140],[700,420],[900,240],[1150,160],
+            [1050,440],[1320,360],[1550,220],[1750,400],[1480,560],[1680,680],
+            [1200,640],[950,640],[1380,140]
+        ];
+        const LINKS = [[0,1],[1,2],[1,3],[3,5],[4,5],[5,6],[6,15],[15,9],[5,7],[7,8],
+            [8,9],[9,10],[8,11],[11,12],[10,12],[11,13],[13,14],[7,14],[7,4],[4,2],[13,7]];
+        const SVGNS = "http://www.w3.org/2000/svg";
+
+        function buildNetwork(svg) {
+            svg.setAttribute("viewBox", "0 0 1920 1080");
+            LINKS.forEach(([a, b], i) => {
+                const [x1, y1] = NODES[a], [x2, y2] = NODES[b];
+                const base = document.createElementNS(SVGNS, "line");
+                base.setAttribute("class", "net-line");
+                base.setAttribute("x1", x1); base.setAttribute("y1", y1);
+                base.setAttribute("x2", x2); base.setAttribute("y2", y2);
+                svg.appendChild(base);
+                const flow = document.createElementNS(SVGNS, "line");
+                flow.setAttribute("class", "net-flow");
+                flow.setAttribute("x1", x1); flow.setAttribute("y1", y1);
+                flow.setAttribute("x2", x2); flow.setAttribute("y2", y2);
+                flow.style.animationDelay = (i * 0.18) + "s";
+                svg.appendChild(flow);
+            });
+            NODES.forEach(([x, y], i) => {
+                const halo = document.createElementNS(SVGNS, "circle");
+                halo.setAttribute("class", "net-halo");
+                halo.setAttribute("cx", x); halo.setAttribute("cy", y); halo.setAttribute("r", 4);
+                halo.style.animationDelay = (i * 0.22) + "s";
+                svg.appendChild(halo);
+                const node = document.createElementNS(SVGNS, "circle");
+                node.setAttribute("class", "net-node");
+                node.setAttribute("cx", x); node.setAttribute("cy", y); node.setAttribute("r", 5);
+                svg.appendChild(node);
+            });
+        }
+        document.querySelectorAll(".net-bg").forEach(buildNetwork);
+
+        /* === PRESENTATION ENGINE === */
+        class SlidePresentation {
+            constructor() {
+                this.slides = document.querySelectorAll('.slide');
+                this.currentSlide = 0;
+                this.stage = document.getElementById('deckStage');
+                this.rail = document.getElementById('rail');
+                this.isEditing = false;
+                this.counted = new Set();
+                this.setupStageScale();
+                this.setupKeyboardNav();
+                this.setupTouchNav();
+                this.setupMouseWheel();
+                this.setupEditMode();
+                this.showSlide(0);
+            }
+            setupStageScale() {
+                const scale = () => {
+                    const f = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+                    const x = (window.innerWidth - 1920 * f) / 2;
+                    const y = (window.innerHeight - 1080 * f) / 2;
+                    this.stage.style.transform = `translate(${x}px, ${y}px) scale(${f})`;
+                };
+                scale();
+                window.addEventListener('resize', scale);
+            }
+            setupKeyboardNav() {
+                document.addEventListener('keydown', (e) => {
+                    if (document.activeElement.getAttribute('contenteditable') === 'true') return;
+                    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); this.nextSlide(); }
+                    else if (e.key === 'ArrowLeft') { e.preventDefault(); this.prevSlide(); }
+                    else if (e.key === 'End') this.showSlide(this.slides.length - 1);
+                    else if (e.key === 'Home') this.showSlide(0);
+                });
+            }
+            setupTouchNav() {
+                let s = 0;
+                document.addEventListener('touchstart', (e) => s = e.touches[0].clientX);
+                document.addEventListener('touchend', (e) => {
+                    const d = s - e.changedTouches[0].clientX;
+                    if (d > 50) this.nextSlide();
+                    if (d < -50) this.prevSlide();
+                });
+            }
+            setupMouseWheel() {
+                let lock = false;
+                document.addEventListener('wheel', (e) => {
+                    if (lock) return;
+                    lock = true; setTimeout(() => lock = false, 600);
+                    if (e.deltaY > 0) this.nextSlide();
+                    if (e.deltaY < 0) this.prevSlide();
+                }, { passive: true });
+            }
+            setupEditMode() {
+                const hotzone = document.querySelector('.edit-hotzone');
+                const toggle = document.getElementById('editToggle');
+                let t;
+                const show = () => { clearTimeout(t); toggle.classList.add('show'); };
+                const hide = () => { t = setTimeout(() => { if (!this.isEditing) toggle.classList.remove('show'); }, 400); };
+                hotzone.addEventListener('mouseenter', show);
+                hotzone.addEventListener('mouseleave', hide);
+                toggle.addEventListener('mouseenter', show);
+                toggle.addEventListener('mouseleave', hide);
+                toggle.addEventListener('click', () => this.toggleEditMode());
+                document.addEventListener('keydown', (e) => {
+                    if ((e.key === 'e' || e.key === 'E') && document.activeElement.getAttribute('contenteditable') !== 'true') this.toggleEditMode();
+                });
+            }
+            toggleEditMode() {
+                this.isEditing = !this.isEditing;
+                document.body.classList.toggle('editing', this.isEditing);
+                document.querySelectorAll('[contenteditable]').forEach(el => el.contentEditable = this.isEditing);
+                document.getElementById('editToggle').classList.toggle('active', this.isEditing);
+            }
+            animateCounters(slide) {
+                if (this.counted.has(slide)) return;
+                this.counted.add(slide);
+                slide.querySelectorAll('.counter').forEach(el => {
+                    const target = +el.dataset.target;
+                    const start = performance.now(), dur = 1100;
+                    const tick = (now) => {
+                        const p = Math.min((now - start) / dur, 1);
+                        const eased = 1 - Math.pow(1 - p, 3);
+                        el.textContent = Math.round(eased * target);
+                        if (p < 1) requestAnimationFrame(tick);
+                    };
+                    requestAnimationFrame(tick);
+                });
+            }
+            showSlide(index) {
+                this.currentSlide = Math.max(0, Math.min(index, this.slides.length - 1));
+                this.slides.forEach((slide, i) => {
+                    const active = i === this.currentSlide;
+                    slide.classList.toggle('active', active);
+                    slide.classList.toggle('visible', active);
+                    if (active) {
+                        this.animateCounters(slide);
+                        slide.querySelectorAll('.metric').forEach(m => m.classList.add('show'));
+                    }
+                });
+                this.updateControls();
+            }
+            nextSlide() { this.showSlide(this.currentSlide + 1); }
+            prevSlide() { this.showSlide(this.currentSlide - 1); }
+            updateControls() {
+                const c = document.querySelector('.deck-controls');
+                if (c) c.textContent = String(this.currentSlide + 1).padStart(2, '0') + ' / ' + String(this.slides.length).padStart(2, '0');
+                this.rail.style.width = ((this.currentSlide + 1) / this.slides.length * 100) + 'vw';
+            }
+        }
+        new SlidePresentation();
+        const controls = document.createElement('div');
+        controls.className = 'deck-controls';
+        document.body.appendChild(controls);
+    </script>
+</body>
+</html>
