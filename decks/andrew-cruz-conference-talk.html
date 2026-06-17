@@ -2,8 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Andrew Cruz — Conference Talk</title>
+
+    <!-- iPhone: "Add to Home Screen" launches the deck chrome-free (closest thing to fullscreen on iOS Safari) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0b1530">
 
     <!-- === Fonts === -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -580,12 +586,15 @@
                 });
             }
             toggleFullscreen() {
+                if (!document.documentElement.requestFullscreen) return;
                 if (document.fullscreenElement) document.exitFullscreen();
                 else document.documentElement.requestFullscreen();
             }
             setupFsHint() {
                 const hint = document.getElementById('fsHint');
                 if (!hint) return;
+                // iPhone Safari has no Fullscreen API — don't show a dead button
+                if (!document.documentElement.requestFullscreen) { hint.remove(); return; }
                 let idle;
                 const refresh = () => {
                     clearTimeout(idle);
