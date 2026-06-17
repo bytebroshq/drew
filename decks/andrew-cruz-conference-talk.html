@@ -247,7 +247,7 @@
 
             <!-- === SLIDE 2: OPERATOR PROFILE === -->
             <section class="slide slide--light">
-                <svg class="net-bg net--light"></svg>
+                <svg class="net-bg net--light" data-net="profile"></svg>
                 <div class="pad">
                     <div class="kicker reveal" data-d="1">// Operator Profile</div>
                     <h2 class="heading reveal" data-d="2" contenteditable>Andrew Cruz</h2>
@@ -268,7 +268,7 @@
 
             <!-- === SLIDE 3: TODAY'S FOCUS === -->
             <section class="slide slide--light">
-                <svg class="net-bg net--light"></svg>
+                <svg class="net-bg net--light" data-net="focus"></svg>
                 <div class="pad">
                     <div class="kicker reveal" data-d="1">// Today's Focus</div>
                     <h2 class="heading big reveal" data-d="2" contenteditable>As grids grow complex, resilience comes down to one thing: trustworthy data.</h2>
@@ -283,7 +283,7 @@
 
             <!-- === SLIDE 4: SCADA ⊃ ADMS === -->
             <section class="slide slide--light">
-                <svg class="net-bg net--light"></svg>
+                <svg class="net-bg net--light" data-net="distinction"></svg>
                 <div class="kicker reveal" data-d="1" style="position:absolute; left:var(--pad); top:var(--pad); z-index:3;">// The Distinction</div>
                 <div class="split">
                     <div class="col-text">
@@ -303,7 +303,7 @@
 
             <!-- === SLIDE 5: GIS → ADMS FLOW === -->
             <section class="slide slide--light">
-                <svg class="net-bg net--light"></svg>
+                <svg class="net-bg net--light" data-net="foundation"></svg>
                 <div class="kicker reveal" data-d="1" style="position:absolute; left:var(--pad); top:var(--pad); z-index:3;">// The Foundation</div>
                 <div class="split">
                     <div class="col-text">
@@ -331,7 +331,6 @@
 
             <!-- === SLIDE 6: FIELD RESULTS (DASHBOARD) === -->
             <section class="slide slide--dark">
-                <svg class="net-bg net--dark"></svg>
                 <div class="pad" style="padding-bottom:0;">
                     <div class="kicker reveal" data-d="1">// Field Results — Ho Chi Minh City</div>
                     <h2 class="heading reveal" data-d="2" style="color:#fff;" contenteditable>Reliability you can measure.</h2>
@@ -359,7 +358,7 @@
 
             <!-- === SLIDE 7: CLOSING === -->
             <section class="slide slide--dark">
-                <svg class="net-bg net--dark"></svg>
+                <svg class="net-bg net--dark" data-net="closing"></svg>
                 <div class="closing">
                     <div class="kicker reveal" data-d="1">// End of Line</div>
                     <h2 class="reveal" data-d="2" contenteditable>Thank You</h2>
@@ -378,18 +377,82 @@
     <div class="rail" id="rail"></div>
 
     <script>
-        /* === SHARED NETWORK MOTIF === */
-        const NODES = [
-            [160,180],[380,320],[300,560],[520,140],[700,420],[900,240],[1150,160],
-            [1050,440],[1320,360],[1550,220],[1750,400],[1480,560],[1680,680],
-            [1200,640],[950,640],[1380,140]
-        ];
-        const LINKS = [[0,1],[1,2],[1,3],[3,5],[4,5],[5,6],[6,15],[15,9],[5,7],[7,8],
-            [8,9],[9,10],[8,11],[11,12],[10,12],[11,13],[13,14],[7,14],[7,4],[4,2],[13,7]];
+        /* === SHARED NETWORK MOTIF ===
+           Each slide can orient the through-lines to its own composition via
+           data-net="<preset>". Nodes live only in zones the text leaves empty,
+           so the energy lines frame the content instead of crossing it. */
+        const PRESETS = {
+            // default: full-bleed scatter (title / closing / dashboard backdrops)
+            grid: {
+                nodes: [
+                    [160,180],[380,320],[300,560],[520,140],[700,420],[900,240],[1150,160],
+                    [1050,440],[1320,360],[1550,220],[1750,400],[1480,560],[1680,680],
+                    [1200,640],[950,640],[1380,140]
+                ],
+                links: [[0,1],[1,2],[1,3],[3,5],[4,5],[5,6],[6,15],[15,9],[5,7],[7,8],
+                    [8,9],[9,10],[8,11],[11,12],[10,12],[11,13],[13,14],[7,14],[7,4],[4,2],[13,7]]
+            },
+            // slide 2: a low "feeder" that flows left→right beneath the profile,
+            // then rises up the right margin toward the stat stack. Stays clear of
+            // the heading (top-left), bio (mid-left) and stat numbers (mid-right).
+            profile: {
+                nodes: [
+                    [165,930],[330,842],[470,956],[620,858],[782,924],[940,808],
+                    [1092,950],[1250,852],[1410,936],[1560,826],[1690,942],[1790,872],
+                    [1800,716]   // short right-margin riser, pulled in from the edge
+                ],
+                links: [[0,1],[1,2],[1,3],[3,4],[3,5],[5,6],[5,7],[7,8],[7,9],[9,10],
+                    [9,11],[11,12],[2,4],[6,8],[10,11]]
+            },
+            // slide 3: three 4-node radial bursts (origin + 3 spokes), one beneath
+            // each focus card — each a different fan so they read as unique.
+            focus: {
+                nodes: [
+                    [360,895],[238,941],[332,791],[486,863],   // burst 1 — 4-node, leans left
+                    [952,869],[852,940],[1058,935],[940,758],[1052,800], // burst 2 — 5-node anchor
+                    [1556,903],[1448,869],[1648,817],[1528,957],// burst 3 — 4-node, leans right
+                    [1560,180],[1780,300],[1660,450]           // top-right accent triangle
+                ],
+                links: [[0,1],[0,2],[0,3],[4,5],[4,6],[4,7],[4,8],[9,10],[9,11],[9,12],
+                    [13,14],[14,15],[15,13]]
+            },
+            // slide 4: split style — small clusters top-left and bottom-left only;
+            // the right half stays clear for the nested-set diagram.
+            distinction: {
+                nodes: [
+                    [320,262],[540,190],[772,256],          // top-left
+                    [440,896],[320,852],[600,910],[470,978] // bottom-left 4-node burst
+                ],
+                links: [[0,1],[1,2],[3,4],[3,5],[3,6]]
+            },
+            // slide 5: 4-node cluster top-left + a jagged "mountain range" along the
+            // bottom — a lower peak (left) and a taller peak (right), zigzag baseline.
+            // Kept left of the right-hand chips and clear of the slide-number counter.
+            foundation: {
+                nodes: [
+                    [300,258],[520,186],[760,250],[560,320],   // top-left 4-node
+                    [308,822],[461,948],[824,815],[725,963],   // A, B, peak C, valley D
+                    [1083,953],[1215,667],[1400,824]           // E, tall peak F, G
+                ],
+                links: [[0,1],[1,2],[0,3],[3,1],
+                    [4,5],[5,6],[6,7],[7,5],[7,8],[8,9],[9,10],[10,8]]
+            },
+            // slide 7: a perimeter ring of flowing energy enclosing the centered
+            // sign-off — a visual "end of line" that frames the thank-you.
+            closing: {
+                nodes: [
+                    [210,200],[560,150],[960,130],[1360,150],[1710,200],[1830,500],
+                    [1710,840],[1360,910],[960,930],[560,910],[210,840],[120,500]
+                ],
+                links: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[8,9],[9,10],[10,11],[11,0]]
+            }
+        };
         const SVGNS = "http://www.w3.org/2000/svg";
 
         function buildNetwork(svg) {
             svg.setAttribute("viewBox", "0 0 1920 1080");
+            const preset = PRESETS[svg.dataset.net] || PRESETS.grid;
+            const NODES = preset.nodes, LINKS = preset.links;
             LINKS.forEach(([a, b], i) => {
                 const [x1, y1] = NODES[a], [x2, y2] = NODES[b];
                 const base = document.createElementNS(SVGNS, "line");
@@ -529,9 +592,6 @@
             }
         }
         new SlidePresentation();
-        const controls = document.createElement('div');
-        controls.className = 'deck-controls';
-        document.body.appendChild(controls);
     </script>
 </body>
 </html>
