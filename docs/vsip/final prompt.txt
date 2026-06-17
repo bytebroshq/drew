@@ -1,0 +1,344 @@
+You are a senior energy systems consultant and PowerPoint presentation expert. 
+Your task is to build a complete, polished, consultative PowerPoint deck 
+(.pptx file) using PptxGenJS for a high-stakes customer meeting.
+
+═══════════════════════════════════════════
+SECTION 1 — MEETING CONTEXT
+═══════════════════════════════════════════
+
+PRESENTER: Andrew (Senior Consultant), Rudy (Consultant), Max (Sales)
+LOCAL PARTNER: MP (Vietnam)
+CUSTOMER: VSIP — Vietnam Singapore Industrial Park
+MEETING: June 26, 2026 · 9:00 AM · VSIP I Office
+
+PURPOSE: Consultative engagement — not a vendor pitch. We are positioning 
+Survalent APAC as the system architect and trusted advisor for VSIP 4. 
+VSIP does not know all the answers yet. They are relying on us to guide 
+them. We must look smart, structured, and expert — while making them feel 
+understood and supported.
+
+═══════════════════════════════════════════
+SECTION 2 — CUSTOMER INTELLIGENCE
+═══════════════════════════════════════════
+
+VSIP 4 PROJECT PARAMETERS (as stated by VSIP, treat as working assumptions):
+- Total area: 750 hectares, fully greenfield, no legacy systems
+- 3 × 110/22kV substations, each 2×80 MVA (total 480 MVA)
+- 22kV distribution grid with Reclosers, LBS, RMUs
+- Peak load: ~200 MW
+- Distributed Rooftop Solar (RTS): 187 MW across tenant factories
+- BESS: 50–100 MWh, centralized (assumed at substation level)
+- Start: Q4 2026, official tender expected Q4 2026
+- Vision: Green, clean, zero-carbon industrial park compliant with 
+  global sustainability standards
+
+VSIP'S STATED CORE REQUIREMENTS:
+1. Multi-vendor integration (IEC-104, Modbus, IEC 61850) across RTS, 
+   BESS, meters, protection relays
+2. Comprehensive real-time monitoring of 22kV grid, RTS, and BESS
+3. Grid stability control during normal operations
+4. Zero-export control — prevent solar from backfeeding to national grid
+5. Islanding / off-grid operation during national grid outages
+6. Industrial cybersecurity compliance
+7. API-ready for AMI and VPP integration
+
+CLARIFICATIONS FROM MP:
+- Parameters are hypothetical/indicative at this stage — project starts Q4 2026
+- VSIP cannot answer deep technical questions yet; they want Survalent 
+  to consult and guide them
+- Goal of this meeting: verify Survalent's capabilities, receive 
+  consultation on system design and investment phasing
+- VSIP wants to understand: software responsiveness (ADMS+DERMS), 
+  system architecture recommendations, and investment phasing advice
+
+KEY OPEN QUESTIONS WE HAVE (use these to frame "assumptions" slide):
+- Is VSIP 4 fully greenfield with no legacy ADMS? (assumed: yes)
+- Who owns the rooftop solar — VSIP, tenants, or third party? 
+  (assumed: tenant-owned, but VSIP wants grid-level control)
+- Will BESS be centralized at substation level? (assumed: yes)
+- What protocols are confirmed for RTS inverters and BESS? 
+  (assumed: IEC-104 to Microgrid Controller, Modbus/Sunspec for inverters)
+- Who will operate the system post-commissioning? (assumed: VSIP internal team)
+- Over how many years is the full build-out planned? (assumed: 5–7 years)
+
+═══════════════════════════════════════════
+SECTION 3 — DECK STRUCTURE (slide-by-slide)
+═══════════════════════════════════════════
+
+Build the following slides in order. Each section except the title slide 
+must begin with a SECTION DIVIDER SLIDE (dark teal/charcoal full-bleed 
+background with large white section title and short descriptor line — 
+styled like a chapter opener).
+
+SLIDE 1 — TITLE SLIDE
+  - Title: "Smart Grid & Energy Management Strategy"
+  - Subtitle: "A Consultative Roadmap for VSIP 4 Industrial Park"
+  - Date, venue, "Confidential" badge
+  - Team: Andrew (Senior Consultant), Rudy (Consultant), Max (Sales)
+  - Visual style: full dark-green background with Survalent brand feel
+
+--- SECTION DIVIDER: "Understanding Your Vision" ---
+
+SLIDE 2 — TODAY'S AGENDA
+  - 6 agenda items in a 2×3 card grid with numbered badges
+  - Items: (1) Understanding VSIP 4's vision, (2) Project assumptions & 
+    parameters, (3) Survalent ADMS + DERMS platform, (4) Recommended 
+    system architecture, (5) 5-phase investment roadmap, 
+    (6) Decisions & next steps
+
+SLIDE 3 — VSIP 4 PROJECT AT A GLANCE
+  - 5 stat cards: 750 ha / 3×110kV / ~200 MW / 187 MW RTS / 50–100 MWh BESS
+  - Core requirements as a clean icon+label list below
+  - Label it: "Working parameters — we will refine these together"
+
+SLIDE 4 — YOUR VISION: GREEN, SMART, ZERO-CARBON
+  - Consultative framing slide: what VSIP wants to achieve in 5 years
+  - Three pillars in large cards: 
+    (1) Reliability — tenants never lose power  
+    (2) Sustainability — zero carbon, ESG-ready  
+    (3) Intelligence — data-driven, automated, scalable
+  - One bold statement at the top: "VSIP 4 is not just an industrial 
+    park. It is a platform for the energy future of Vietnamese industry."
+
+--- SECTION DIVIDER: "Our Working Assumptions" ---
+
+SLIDE 5 — ASSUMPTIONS & DESIGN BASIS
+  - Two-column layout: LEFT = confirmed facts, RIGHT = our assumptions 
+    (what we are designing around)
+  - Confirmed: Greenfield, 110/22kV, 22kV grid with reclosers/LBS/RMU, 
+    Q4 2026 start
+  - Assumptions: Greenfield (no legacy ADMS), BESS centralized at 
+    substation, tenant-owned RTS with grid-level VSIP control required, 
+    IEC-104/Modbus protocols, VSIP internal operations team, 5–7 year 
+    phased build-out
+  - Footer note: "These assumptions form the basis of our proposed 
+    architecture. We will validate and refine them together."
+
+--- SECTION DIVIDER: "The Survalent Platform" ---
+
+SLIDE 6 — WHY A GRID-FIRST PLATFORM MATTERS FOR VSIP
+  - Explain the problem: 187 MW of distributed solar + BESS + 200 MW 
+    load requires a control platform built for grid operations — not a 
+    market aggregation tool
+  - 3 pain points without a grid-first platform: (1) No real-time 
+    visibility of DER impacts on the 22kV network, (2) Zero-export 
+    cannot be enforced reliably without topology awareness, 
+    (3) Islanding and black start require tight SCADA+DERMS integration
+  - Survalent's answer: "Built for utility operations. Proven in 24/7 
+    control room environments."
+
+SLIDE 7 — SURVALENTONE ADMS + DERMS: PLATFORM OVERVIEW
+  - Layered architecture diagram (drawn with shapes, not images):
+    Bottom layer: SCADA / Real-time data acquisition
+    Layer 2: ADMS — topology, OMS, FLISR, VVO
+    Layer 3: DERMS — RTS monitoring, curtailment, zero-export, forecasting
+    Layer 4: Microgrid — BESS dispatch, islanding, black start
+    Top layer: VPP / Smart energy ecosystem
+  - Right side: integration icons — IEC-104, Modbus, IEC 61850, DNP3, 
+    IEEE 2030.5, API
+  - Style: teal-filled layer bands with white text, orange accent for 
+    Survalent branding
+
+SLIDE 8 — KEY CAPABILITIES RELEVANT TO VSIP 4
+  - 6-card grid (2×3), each card: icon circle + bold title + 2-line description
+  - Cards: ADMS, DERMS, Microgrid & BESS Control, Multi-vendor Integration,
+    Industrial Cybersecurity, VPP & AMI Readiness
+  - Highlight ADMS and DERMS cards with teal border (most relevant to VSIP now)
+
+--- SECTION DIVIDER: "Recommended Architecture" ---
+
+SLIDE 9 — VSIP 4 SYSTEM ARCHITECTURE (CONCEPTUAL)
+  - Structural diagram showing:
+    Top: National Grid (110kV connection)
+    Middle: 3× 110/22kV Substations with BESS at each
+    Below: 22kV feeder network (reclosers, LBS, RMUs)
+    Bottom: Tenant factories with rooftop solar (RTS) at POI points
+    Overlay: SurvalentONE ADMS+DERMS as the central intelligence layer 
+    connecting all elements
+  - Color code: teal for grid elements, orange accent for DER assets, 
+    dark gray for Survalent platform box
+  - Keep it clean — boxes and lines, no clipart
+
+SLIDE 10 — ZERO-EXPORT CONTROL STRATEGY
+  - This is a critical requirement — give it its own slide
+  - Show the control logic flow: RTS generation → POI measurement → 
+    DERMS compares vs grid limit → if excess: curtail RTS / charge BESS 
+    / alarm operator → hard limit enforced at feeder/substation
+  - Two modes: Phase 2 (monitoring + alarms via ADMS), 
+    Phase 3 (closed-loop automated enforcement via DERMS)
+  - Key message: "Zero export is not a feature. It is a regulatory 
+    obligation. It must be designed in from Phase 1."
+
+SLIDE 11 — ISLANDING & BLACK START STRATEGY
+  - Explain the scenario: national grid trips → VSIP must sustain power 
+    to all tenant factories
+  - Black start sequence: BESS energizes → 22kV bus stabilizes → 
+    Solar reconnects → Loads restored in priority order
+  - Requirements: grid-forming inverters, protection coordination, 
+    defined island boundary
+  - Key message: "Islanding capability is what lets VSIP tell premium 
+    tenants: you will never lose power."
+
+--- SECTION DIVIDER: "Your Investment Roadmap" ---
+
+SLIDE 12 — 5-PHASE INVESTMENT ROADMAP (VISUAL TIMELINE)
+  - Horizontal timeline with 5 phase columns, each color-coded:
+    Phase 1 (teal): Foundation — SCADA, substations, reclosers/LBS/RMU, 
+      power quality, OT cybersecurity, fiber comms backbone
+    Phase 2 (blue): Grid Intelligence — ADMS, topology, FLISR, Volt/VAR, 
+      zero-export monitoring, basic BESS dispatch
+    Phase 3 (green): Renewable Integration — DERMS, RTS monitoring, 
+      curtailment, zero-export closed-loop, solar forecasting, 
+      BESS optimization
+    Phase 4 (amber): Microgrid & Resilience — Microgrid controller, 
+      islanding, black start, grid-forming control, protection coordination
+    Phase 5 (purple): Smart Energy Ecosystem — Advanced DERMS/VPP, 
+      demand response, carbon accounting, ESG dashboard, market readiness
+  - Each phase: phase number circle + phase name + horizon label + 
+    3–6 tag pills listing key deliverables
+  - Below the timeline: one-line outcome statement per phase
+
+SLIDE 13 — PHASE 1 DEEP DIVE: FOUNDATION
+  - Why Phase 1 must be designed for Phase 5
+  - Key deliverables and what each enables in future phases
+  - Design principle callout box: "The data model, communication 
+    backbone, and OT cybersecurity architecture you build in Phase 1 
+    either unlock or constrain every subsequent phase. Get this right first."
+  - Timeline: construction through initial energization
+
+SLIDE 14 — PHASE 2 DEEP DIVE: GRID INTELLIGENCE
+  - ADMS goes live — what this means operationally for VSIP
+  - Zero-export monitoring (alarms) starts here — before full DERMS
+  - Tenant benefits: faster fault restoration, measurable uptime improvement
+  - Key message: "The first tenant rooftop solar connections go live 
+    before DERMS is deployed. Zero-export risk management must start here."
+
+SLIDE 15 — PHASES 3–5: THE JOURNEY TO SMART ENERGY
+  - Summary view — 3 columns (Phase 3, 4, 5) each with:
+    Phase name, horizon, 4–5 key deliverables, business outcome statement
+  - Keep concise — this is a signpost, not a deep dive
+  - Closing line: "Each phase adds intelligence. Each phase adds value. 
+    No phase requires a rip-and-replace."
+
+--- SECTION DIVIDER: "Our Recommendations for Today" ---
+
+SLIDE 16 — KEY DECISIONS TO MAKE NOW
+  - 6-card grid (2×3) — numbered 01–06
+  - Cards: (01) Design the data model once, (02) Zero export starts Phase 2 
+    not Phase 3, (03) Clarify RTS ownership before tender, (04) BESS at 
+    substation level — not tenant factories, (05) Define who operates 
+    the system, (06) Influence the tender spec — now
+  - Each card: number badge + bold title + 2-sentence explanation
+  - Style: white cards with teal number badge, subtle shadow
+
+SLIDE 17 — HOW WE MOVE FORWARD
+  - 4 next steps as horizontal numbered cards:
+    (1) Confirm project parameters and assumptions
+    (2) Survalent APAC delivers reference architecture document
+    (3) Technical deep-dive workshop with VSIP engineering team
+    (4) Reference site visit — see the platform at scale
+  - Dark background (matching title slide) — signals conclusion
+  - Closing line: "We come as your system architects, not as vendors. 
+    Our goal is to help you make decisions today that you will not 
+    regret in Phase 5."
+
+═══════════════════════════════════════════
+SECTION 4 — DESIGN LANGUAGE (MANDATORY)
+═══════════════════════════════════════════
+
+Extract and replicate the Survalent brand design system from the 
+uploaded reference decks (Hasnain and Ilija). Specifically:
+
+COLOR PALETTE:
+  Primary teal (titles, key elements): #2B7A8C (Survalent teal)
+  Accent orange-red (Survalent dot, highlights): #D94F1E
+  Dark charcoal (section dividers, dark slides): #2C2C2C or #1A1A1A
+  Light background: #FFFFFF
+  Card fill (light): #F5F5F5 or #FFF3EF (pale salmon for accent cards)
+  Border/line: #D3D1C7 or #CCCCCC
+  Text primary: #1A1A1A
+  Text secondary: #5F5E5A
+
+TYPOGRAPHY:
+  Title font: Calibri Bold or Arial Bold (safe for cross-platform)
+  Body font: Calibri or Arial
+  Title size: 36–40pt on content slides, 44–48pt on title/divider slides
+  Body text: 14–16pt
+  Caption / tag text: 10–12pt
+
+LAYOUT SIGNATURE (replicate from Ilija deck):
+  - Every content slide: small orange-red filled rectangle (~0.35"×0.45") 
+    at top-left corner (x=0, y=0) as the Survalent brand accent — 
+    this is the visual signature of the Ilija deck
+  - "Survalent." wordmark in dark charcoal with orange dot at bottom-left 
+    of every slide (footer area, y≈5.3")
+  - "Confidential & Proprietary" centered at bottom as footer text 
+    in small gray
+  - Slide number at bottom-right in small gray
+
+SECTION DIVIDER SLIDES:
+  - Full-bleed background: dark charcoal (#2C2C2C) or dark teal (#04342C)
+  - Large white section title (40–44pt, Calibri Bold)
+  - Short descriptor line below in light teal or pale green (14pt italic)
+  - NO footer elements except the Survalent wordmark in white
+
+CARD STYLE:
+  - Rounded rectangle (rectRadius: 0.1)
+  - White fill with 0.5px border (#CCCCCC) and subtle drop shadow
+  - OR teal/orange fill for highlighted cards (text white, 800-stop weight)
+  - Icon circle: 0.42" oval in pale teal/pale orange fill with 
+    matching darker icon PNG inside
+
+SHAPES ONLY — NO CLIPART, NO EXTERNAL IMAGES:
+  - All diagrams must be built with PptxGenJS shapes (rectangles, ovals, 
+    lines, arrows)
+  - Use addShape(), addText(), addImage() (icons only via react-icons 
+    rendered to base64 PNG)
+  - Architecture diagrams: use ROUNDED_RECTANGLE for boxes, LINE/arrow 
+    shapes for connectors
+
+═══════════════════════════════════════════
+SECTION 5 — SPEAKER NOTES (MANDATORY)
+═══════════════════════════════════════════
+
+Every slide must have speaker notes added via slide.addNotes(). Notes must:
+- State WHO presents this slide (Andrew = senior strategic slides, 
+  Rudy = technical slides, either for transitional slides)
+- Give 2–3 key talking points to hit
+- Flag any question to ask VSIP at that slide
+- Note any slide where Andrew should pause and say something that 
+  establishes seniority or expertise
+
+═══════════════════════════════════════════
+SECTION 6 — TECHNICAL EXECUTION RULES
+═══════════════════════════════════════════
+
+- Use PptxGenJS (node.js), layout LAYOUT_16x9 (10" × 5.625")
+- Safe fonts only: Calibri, Arial (never Aptos)
+- NEVER use "#" prefix on hex color strings
+- NEVER reuse option objects (shadow, fill) across multiple addShape calls 
+  — use a factory function like makeShadow() and makeFill()
+- No decorative color bars or accent stripes on cards
+- Every text box must have sufficient h (height) to avoid overflow — 
+  add 20% slack
+- Run visual QA after generation: convert to PDF, render to JPG images, 
+  inspect each slide for overflow, overlap, and misalignment
+- Fix all visual defects before declaring complete
+- Output file: /mnt/user-data/outputs/VSIP4_Survalent_Strategy_Deck.pptx
+
+═══════════════════════════════════════════
+SECTION 7 — TONE & NARRATIVE RULES
+═══════════════════════════════════════════
+
+- The deck is consultative, not a product brochure. VSIP should feel 
+  guided, not sold to.
+- Every section should feel like it was written specifically for VSIP 4 — 
+  not a generic DERMS pitch
+- Use VSIP's own language back to them: "green, clean, zero-carbon," 
+  "tenant factories," "national grid," "smart industrial park"
+- Position Survalent as the architect of VSIP's vision — not a vendor 
+  competing for a contract
+- The roadmap must feel like a gift: "here is your path, we already 
+  thought it through for you"
+- Andrew's slides (strategic) should feel authoritative and unhurried. 
+  Rudy's slides (technical) should feel precise and expert.

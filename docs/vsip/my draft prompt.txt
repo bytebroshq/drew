@@ -1,0 +1,25 @@
+
+Before we create the powerpoint presentation,
+Help me create a prompt first
+
+I want to create a prompt to instruct Claude how i want the Powerpoint deck to be created.
+First, we should use or have semblance with the color and design theme of the powerpoint presentations I just uploaded. that is Survalent element.
+
+I need to create a PPT which is consultative in nature and especially intended for VSIP project 4, based on all the information the VSIP customer has given us and what MP has gathered, together with our questions and the responses we got.
+
+We need to provide agenda, assumption on utility assets, utility goal in mind, introduction of Survalent ADMS/DERMS, then proceed with a custom strategy roadmap for them that we are proposing. It should be in phases and looks like we are guiding them from scratch but we look smart and experts.
+
+use opus
+
+make the transitions visually coherent with the content i provided
+
+
+we are developing a solution which is future proof. meaning the customer and utility will have the flexibility to explore products.
+you are not tied to a full stack of technology
+
+
+let’s build an interesting animated slides in html for {add reference doc or text file here}” 
+
+use opus
+
+make the transitions visually coherent with the content i provided”  baka maging more creative sya based sa nabasa sa notes mo

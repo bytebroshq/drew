@@ -1,0 +1,219 @@
+We are Survalent APAC. We have a very important meeting next week. It is for VSIP (Vietnam Singapore Industrial Park). It will be me who is Andrew, Rudy, and Max. Max is our sales guy. I am the senior consultant and Rudy is the consultant. I will be accompanied by our local partner in Vietnam called MP.
+
+This was the email of the customer, VSIP, to MP which was relayed to us.
+
+Dear Mr. Hiệu,
+ 
+As discussed with you, I am pleased to invite you and your team meeting scheduled for 9:00 AM on Friday, June 26, 2026, at VSIP I office.
+To help your team prepare for our discussion, we would like to share some fundamental information regarding our project parameters as well as our core expectations below:
+Project Overview & Requirements
+VSIP is currently developing a new industrial park project with a total area of approximately 750 hectares. Our vision is to establish a smart, sustainable, and low carbon industrial with a highly reliable electrical infrastructure.
+Our project is based on the following parameters:
+1. Project Specifications
+
+•	Total Area: 750 hectares.
+•	110/22kV Substations: 03 units, each with a 2x80MVA configuration (Total 480MVA).
+•	Distribution Grid: 22kV.
+•	Peak Load: Estimated at 200MW.
+•	Distributed Rooftop Solar (RTS): Total capacity of 187MW.
+•	Battery Energy Storage System (BESS): Currently considering a scale of 50MWh to 100MWh.
+
+2. Core Technical Requirements
+We are currently exploring Smart Grid, Microgrid Control, and Energy Management System (EMS) solutions capable of supporting:
+•	Microgrid operation and grid stabilization
+•	Renewable energy and BESS optimization
+•	Peak shaving and zero-export control
+•	Multi-vendor integration of RTS, BESS, SCADA, meters, and protection systems
+•	Islanding and black-start capabilities
+•	DERMS / VPP readiness
+•	Industrial cybersecurity
+We would appreciate the opportunity to discuss your solution portfolio and understand how your platform could support the development of this project.
+For our discussion meeting, we would be interested in reviewing:
+•	Your Smart Grid / Microgrid / EMS solution architecture
+•	Multi-vendor integration capabilities
+•	Relevant reference projects of similar scale
+•	Recommended system architecture for our project
+We look forward to your response in the meeting.
+
+
+End.
+
+
+Rudy have responded to MP with this:
+
+
+Dear Mr. Hai,
+
+Thank you for sharing the details of the VSIP 4 project. APAC team has completed an initial review of the documentation and has forwarded the information to our product team for further discussion.
+
+To help us better understand their operational goals and engineer the right solution, we need your assistance in sharing a few technical clarification questions with VSIP. Please see our questions detailed below:
+
+General
+•	VSIP claim to have 187 MW of “Distribution Rooftop Solar”, but how many individual Point of Interconnection (POI or PCC) to the grid? This information will help us understand if we are orchestration a lot of small assets or a smaller amount of larger assets?
+•	We understand they are looking to add U-BESS in the range from 50 MWh to 100MWh, for us that is a lot. Could MP/VSIP share the timeline for U-BESS implementation here?
+•	Who owns the asset of the roof top solar and BESS?
+
+Grid Stabilization/Microgrid Operation
+•	What does “grid stabilization” mean in their specific context?
+•	Are they concerned about feeder backfeeding, transformer limits, feeder limits, busbar limits, voltage excursions, frequency events, or power quality?
+•	Are they asking for real-time monitoring, operator alarms, automated dispatch, or closed-loop control?
+•	What grid constraints are they trying to manage today, and how are they currently detected?
+Renewable Energy and BESS Optimization
+•	What is the primary use case for the BESS: peak shaving, solar smoothing, solar excess storage, backup power, resiliency, demand charge reduction, or market participation?
+•	Why is the BESS size stated as a range of 50–100 MW/MWh? Is that based on a completed study, budgetary estimate, or future expansion plan?
+•	Has the BESS already been selected or deployed? If not, what assumptions are being made about inverter capabilities, control interface, and operating modes?
+•	What optimization objective matters most: cost savings, reliability, export control, battery life, emissions, or revenue?
+Peak Shaving / Zero Export
+•	Is zero export a hard interconnection requirement or an operating preference?
+•	At what point must export be controlled: facility meter, POI, feeder, transformer, or substation?
+•	What response time is required for export limiting?
+•	Should the system curtail solar, charge the BESS, adjust load, or use a prioritized sequence?
+Islanding and Black Start
+•	Which assets are expected to support islanding?
+•	Which assets are grid-forming versus grid-following?
+•	Do they have assets capable of frequency reference, voltage reference, or rotational inertia/synthetic inertia? is the inertia enough for islanding?
+•	For black start, which asset starts first, and what is the expected restoration sequence (for example Diesel Genset, BESS, solar, loads, etc.?
+•	Have the assets, protection and switching scheme already been engineered for islanded and black start operation?
+DERMS / VPP Readiness
+•	What do they mean by VPP readiness?
+•	Are they expecting future market participation, utility dispatch, demand response, capacity services, or aggregation across multiple sites?
+•	What market or operator signals would need to be received?
+•	Do they require forecasting, bidding, settlement reporting, or telemetry compliance?
+•	Is the goal near-term implementation or future-proofing?
+
+Multi-vendor Integration
+•	Which systems and vendors are already selected for RTS, BESS, SCADA, Meters, Relays, and Protection?
+•	What protocol are available: DNP3, Modbus, IEC 61850, ICCP, IEEE 2030.5, Sunspec, etc?
+
+Ultimate Purpose
+•	With all requirements shared by VSIP, are they looking for a software requirement checkbox or a consultant on how to achieve the requirements?
+
+We appreciate your support in coordinating these clarifications with VSIP. Having these insights will allow us to propose the most accurate and optimized architecture for the project.
+
+Please let me know if you need any clarification on the questions above.
+
+
+End.
+
+
+Hieu then responded with this:
+
+Dear Rudy and Andrew,
+Thank you for reviewing the initial parameters and raising those valid technical questions. To clarify the current situation, the project specifications previously shared (e.g., 200MW load, 187MW RTS, 100MWh BESS) are hypothetical assumptions provided by the client at this stage.This inquiry is about the upcoming VSIP 4 Industrial Park project, which is scheduled to start in Q4 this year. 
+The technical questions you raised are currently difficult for VSIP to answer. In fact, they are looking to you, in your capacity as a consultant, to guide them and provide recommendations on those very issues. Rather than diving into deep technical engineering right now, VSIP is looking to verify our capabilities and needs our consultation on system design and investment phasing.
+Here is the high-level context and their core requirements:
+1. Project Vision & Scope
+•	Vision: Develop a green, clean, and zero-carbon industrial park that complies with global sustainability standards.
+•	Scale: 03x 110kV substations, a 22kV distribution grid (including Reclosers, LBS, RMUs), Distributed Rooftop Solar (RTS) on tenant factories, and a centralized BESS.
+2. Core Operational Requirements
+•	Multi-vendor Integration: The platform must seamlessly integrate with 3rd-party 22kV equipment (via Modbus, IEC-104), RTS, and BESS (potentially communicating with the Microgrid Controller via IEC-104). It must also be API-ready for higher-level integrations like AMI and VPP.
+•	Comprehensive Monitoring: Real-time data acquisition and visualization across the 22kV grid, RTS, and BESS.
+•	Control grid, RTS and BESS (Microgrid Controller): VSIP needs robust control logic for main scenarios:
+o	Maintaining stability during normal grid operations.
+o	Peak load management ensuring strict zero-export (preventing excess solar power from feeding back into the national grid).
+o	Islanding/Off-grid operation to maintain power during main grid outages. 
+•	Security: Compliance with industrial cybersecurity standards.
+Our Proposed Approach: VSIP provided these hypothetical parameters to evaluate if STC's solutions can fulfill these overarching goals. Since we can meet these demands, our strategy for the upcoming meeting should be consultative.
+We would appreciate it if you could prepare a presentation focusing on:
+1.	Software responsiveness: An introduction to the ADMS + DERM software that can address VSIP's requirements.
+2.	System Architecture Consulting: A recommended Microgrid/EMS control architecture that addresses the scenarios above.
+3.	Investment Phasing: Advice on how VSIP should phase their control system investments (from Phase 1 base system to a fully scaled Smart Grid) to successfully execute the project.
+By positioning ourselves as their system architects now, we can strongly influence their technical specifications before the official tender in Q4.
+Looking forward to your thoughts and preparation for the meeting.
+
+
+End.
+
+Rudy then responded further with this:
+
+Hello Mr Hieu,
+
+Thank you for the quick response and for clarifying the context. 
+
+To ensure we build a highly targeted slide deck that hits the mark on software responsiveness, microgrid architecture, and project phasing, we need to clarify a few things here
+
+Could you help us look into the following points? We have included a quick explanation for each to show why this information is critical for structuring our technical recommendations:
+
+1.	System Scope
+Question: Assuming VSIP 4 is a completely greenfield industrial park, is it correct to say we will design and proposing a brand-new, standalone ADMS & DERMS platform?
+We need to know if we are starting a clean slate or if we must design around legacy ADMS software in older VSIP project.
+
+2.	RTS & Control Asset Ownership
+Question: Since the 187 MW of Rooftop Solar (RTS) will be distributed across tenant factories, who is expected to fund the solar installation, the local RTU or the microgrid controller? Will it be VSIP, a third party company, or the tenant themselves?
+We need to know this because it completely dictates the control strategy. If individual tenants own the rooftop solar, VSIP probably cannot easily access the RTU or the microgrid controller to monitor and control the Rooftop solar
+
+3.	Centralized BESS Placement
+Question: Can you confirm about our assumption that the centralized BESS will be installed directly at the main 22kV substation level rather than distributed across the individual tenant factories?
+We need to know this because it will tell how the network grid will react and how to achieve the requirement to maintain the grid stability and peak load management.
+
+4.	AMI & VPP integration Ecosystem
+Question: Since the solution needs to be API ready for AMI and VPP integration, does VSIP already have preferred vendor name in minds for either AMI or VPP systems?
+Knowing their preferred vendors allows us to review the compatibility to our software
+
+5.	Project Implementation Timeline
+Question: Given the massive scale of this project, over how many year VSIP 4 is planning to phase the full build-out and achieve the complete smart grid vision?
+This information will help us to provide a roadmap timeline starting from SCADA/ADMS to a DERMS phase
+
+Getting your insight on these questions will allow us to build a strategic deck that proves our expertise and positions our solution perfectly.
+
+We look forward to your information.
+
+End.
+
+Mr. Hai then responded with this:
+
+Dear Rudy,
+
+Thank you for your detailed questions and for the effort that the STC team is putting into preparing the technical proposal and presentation for the upcoming VSIP 4 discussion.
+Following our direct discussions with the VSIP team, we have obtained clarification on the items raised in your email. Please find below our responses to each question. For ease of review, MP's answers are provided in red text.
+We hope this information will assist the STC team in developing the solution architecture, technical recommendations, and presentation materials for the VSIP 4 Smart Grid, Microgrid, EMS, ADMS, and DERMS project.
+
+1.	System Scope
+Question: Assuming VSIP 4 is a completely greenfield industrial park, is it correct to say we will design and proposing a brand-new, standalone ADMS & DERMS platform?
+We need to know if we are starting a clean slate or if we must design around legacy ADMS software in older VSIP project.
+[MP answer] This is a 100% greenfield project. While VSIP currently operates an ADMS platform at VSIP 1, VSIP 4 is a completely separate industrial park development with no dependence on VSIP 1's existing system. At present, VSIP is still finalizing the overall smart grid architecture and solution concept. Therefore, this project is a brand-new standalone ADMS & DERMS platform that will be proposed, with no requirement to design around, integrate with, or migrate from the existing VSIP 1 ADMS platform.
+
+2.	RTS & Control Asset Ownership
+Question: Since the 187 MW of Rooftop Solar (RTS) will be distributed across tenant factories, who is expected to fund the solar installation, the local RTU or the microgrid controller? Will it be VSIP, a third party company, or the tenant themselves?
+We need to know this because it completely dictates the control strategy. If individual tenants own the rooftop solar, VSIP probably cannot easily access the RTU or the microgrid controller to monitor and control the Rooftop solar
+[MP answer] VSIP has confirmed that they will be the direct investor, owner, and operator of the entire Rooftop Solar (RTS) program across VSIP 4. The RTS systems will be deployed on tenant factory rooftops, but all RTS assets will remain under VSIP ownership and management. In addition, the associated Microgrid Controllers will also be owned and operated by VSIP.
+As a result, VSIP will have full visibility, monitoring, and control authority over the RTS and BESS assets, including generation management, dispatch optimization, and curtailment functions. This ownership model provides a strong foundation for centralized supervision of DERMS and coordinated microgrid operations across the industrial park.
+
+3.	Centralized BESS Placement
+Question: Can you confirm about our assumption that the centralized BESS will be installed directly at the main 22kV substation level rather than distributed across the individual tenant factories?
+We need to know this because it will tell how the network grid will react and how to achieve the requirement to maintain the grid stability and peak load management.
+[MP answer] Based on the latest information from VSIP, the current concept is not to deploy a centralized utility-scale BESS at the main 22kV substation. Instead, BESS systems are expected to be distributed across individual factories and integrated with local RTS installations. Each RTS+BESS combination would be managed through local Microgrid Controllers, with higher-level coordination and optimization provided by the central DERMS platform.
+
+4.	AMI & VPP integration Ecosystem
+Question: Since the solution needs to be API ready for AMI and VPP integration, does VSIP already have preferred vendor name in minds for either AMI or VPP systems?
+Knowing their preferred vendors allows us to review the compatibility to our software
+[MP answer] At this stage, VSIP has not identified any preferred AMI or VPP vendors and remains open to evaluating different technology ecosystems. This provides STC with an opportunity to recommend suitable AMI and VPP partners while highlighting the Survalent platform's openness, interoperability, and integration capabilities.
+
+5.	Project Implementation Timeline
+Question: Given the massive scale of this project, over how many year VSIP 4 is planning to phase the full build-out and achieve the complete smart grid vision?
+This information will help us to provide a roadmap timeline starting from SCADA/ADMS to a DERMS phase
+[MP answer] VSIP has indicated that they do not intend to implement the project through multiple long-term phases. Instead, their objective is to deploy the complete Smart Grid ecosystem as an integrated program and achieve full implementation within approximately 2 to 3 years.
+The expectation is that the core architecture, including ADMS, DERMS, Microgrid Management, BESS integration, AMI readiness, and future VPP interoperability, should be designed up front as a unified platform rather than as separate standalone projects deployed over an extended timeline.
+In addition, VSIP emphasized that the overall solution architecture should be developed with a long-term 50-year vision, ensuring scalability, flexibility, and the ability to accommodate future technologies, load growth, DER expansion, and evolving energy market requirements.
+
+
+
+End.
+
+Rudy then responded with this:
+
+Dear Mr Hai,
+
+Thank you very much for providing these detailed clarifications from the VSIP team. This information is highly valuable and gives our team a clear direction to refine the solution architecture and presentation materials for the upcoming VSIP 4 discussion.
+
+To ensure our team design perfectly match VSIP’s long-term vision, we would like to seek one specification clarification regarding the term “VPP Interoperability” mentioned in the AMI & VPP integration ecosystem section.
+
+Could you please clarify which of the following scenarios VSIP envisions for their VPP strategy?
+•	Scenario A (Survalent as the VPP provider): Is VSIP looking for the proposed Survalent platform (ADMS/DERMS) to inherently act and function as the Virtual Power Plant (VPP) itself aggregating, optimizing, and dispatching the distributed RTS and BESS assets directly to participate in the energy market or provide grid services?
+•	Scenario B (Survalent connecting to an External VPP): does VSIP plan to procure a separate, dedicated third party VPP platform in the future, meaning Survalent’s role is to provide the open APIs and interoperability standards (e.g IEEE 2030.5) to interchange data and control command two-ways (such as receiving market dispatch optimization from the VPP, or sending network constraint/curtailment overrides from Survalent to the VPP)?
+
+We look forward to your guidance on this matter.
+
+
+
+
