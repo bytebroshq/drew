@@ -207,15 +207,6 @@
         .slide.visible [data-d="5"] { transition-delay: .60s; }
         .slide.visible [data-d="6"] { transition-delay: .72s; }
 
-        /* === EDIT MODE === */
-        .edit-hotzone { position: fixed; top: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }
-        .edit-toggle { position: fixed; top: 20px; left: 20px; width: 44px; height: 44px; background: var(--blue); color: #fff; border: none; border-radius: 50%; font-size: 20px; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity .3s ease; z-index: 10001; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(67,97,238,.3); }
-        .edit-toggle:hover { background: #3553d8; }
-        .edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
-        [contenteditable]{ border-radius: 6px; }
-        .editing [contenteditable] { outline: 2px dashed var(--blue); outline-offset: 6px; background: rgba(67,97,238,.06); }
-        [contenteditable]:focus { outline-color: var(--blue); background: rgba(67,97,238,.12); }
-
         /* === PROGRESS / CONTROLS === */
         .deck-controls { position: fixed; right: 26px; bottom: 22px; z-index: 1000; font-family: var(--font-mono); font-size: 14px; letter-spacing: 2px; color: var(--text-muted); background: rgba(255,255,255,.75); padding: 7px 14px; border-radius: 20px; backdrop-filter: blur(6px); }
         .rail { position: fixed; left: 0; bottom: 0; height: 3px; background: var(--blue); z-index: 1000; transition: width .5s var(--ease); }
@@ -230,7 +221,7 @@
             .deck-viewport, .deck-stage { position: static; width: auto; height: auto; transform: none !important; overflow: visible; }
             .slide { position: relative; visibility: visible !important; opacity: 1 !important; width: 1920px; height: 1080px; break-after: page; page-break-after: always; }
             .slide:last-child { break-after: auto; }
-            .deck-controls, .edit-toggle, .edit-hotzone, .rail { display: none !important; }
+            .deck-controls, .rail { display: none !important; }
         }
     </style>
 </head>
@@ -244,7 +235,7 @@
                 <div class="telemetry reveal" data-d="1">SURVALENT TECHNOLOGY<br>APAC · FIELD SOLUTIONS<br>● SYSTEM ONLINE</div>
                 <div class="title-wrap">
                     <div class="kicker reveal" data-d="1">The Role of GIS in Modern Utility Operations</div>
-                    <h1 class="reveal" data-d="2" contenteditable>GIS: the single source of truth behind <em>smarter grids</em></h1>
+                    <h1 class="reveal" data-d="2">GIS: the single source of truth behind <em>smarter grids</em></h1>
                     <p class="byline reveal" data-d="3"><b>Andrew Cruz</b> — Field Solutions Consultant, Survalent Technology</p>
                 </div>
                 <div class="slide-no">01 / 07</div>
@@ -255,11 +246,11 @@
                 <svg class="net-bg net--light" data-net="profile"></svg>
                 <div class="pad">
                     <div class="kicker reveal" data-d="1">// Operator Profile</div>
-                    <h2 class="heading reveal" data-d="2" contenteditable>Andrew Cruz</h2>
+                    <h2 class="heading reveal" data-d="2">Andrew Cruz</h2>
                     <div class="about-grid">
                         <div class="about-bio reveal-left" data-d="3">
                             <div class="role">Field Solutions Consultant · Survalent</div>
-                            <p contenteditable>More than a decade turning complex grid challenges into business value across the APAC region — translating SCADA, ADMS, and energy-automation deployments into reliability operators can measure.</p>
+                            <p>More than a decade turning complex grid challenges into business value across the APAC region — translating SCADA, ADMS, and energy-automation deployments into reliability operators can measure.</p>
                         </div>
                         <div class="stat-stack">
                             <div class="stat reveal" data-d="3"><div class="num"><span class="counter" data-target="13">0</span>+</div><div class="lbl">Years in SCADA / ADMS</div></div>
@@ -276,11 +267,11 @@
                 <svg class="net-bg net--light" data-net="focus"></svg>
                 <div class="pad">
                     <div class="kicker reveal" data-d="1">// Today's Focus</div>
-                    <h2 class="heading big reveal" data-d="2" contenteditable>As grids grow complex, resilience comes down to one thing: trustworthy data.</h2>
+                    <h2 class="heading big reveal" data-d="2">As grids grow complex, resilience comes down to one thing: trustworthy data.</h2>
                     <div class="focus-track">
-                        <div class="fcard reveal" data-d="3"><div class="fnode">01</div><h3 contenteditable>The distinction</h3><p contenteditable>Why every ADMS is SCADA — but not every SCADA is an ADMS.</p></div>
-                        <div class="fcard reveal" data-d="4"><div class="fnode">02</div><h3 contenteditable>The foundation</h3><p contenteditable>How GIS feeds the ADMS as the single source of truth.</p></div>
-                        <div class="fcard reveal" data-d="5"><div class="fnode">03</div><h3 contenteditable>The payoff</h3><p contenteditable>Reliability you can measure — proven at scale across APAC.</p></div>
+                        <div class="fcard reveal" data-d="3"><div class="fnode">01</div><h3>The distinction</h3><p>Why every ADMS is SCADA — but not every SCADA is an ADMS.</p></div>
+                        <div class="fcard reveal" data-d="4"><div class="fnode">02</div><h3>The foundation</h3><p>How GIS feeds the ADMS as the single source of truth.</p></div>
+                        <div class="fcard reveal" data-d="5"><div class="fnode">03</div><h3>The payoff</h3><p>Reliability you can measure — proven at scale across APAC.</p></div>
                     </div>
                 </div>
                 <div class="slide-no">03 / 07</div>
@@ -292,8 +283,8 @@
                 <div class="kicker reveal" data-d="1" style="position:absolute; left:var(--pad); top:var(--pad); z-index:3;">// The Distinction</div>
                 <div class="split">
                     <div class="col-text">
-                        <h2 class="heading reveal" data-d="2" contenteditable>All ADMS platforms are SCADA. Not all SCADA platforms are ADMS.</h2>
-                        <p class="lead reveal" data-d="3" contenteditable>SCADA gives operators <b>visibility and control</b>. ADMS adds the intelligence on top — network modeling, advanced applications, and automation that turn raw telemetry into decisions.</p>
+                        <h2 class="heading reveal" data-d="2">All ADMS platforms are SCADA. Not all SCADA platforms are ADMS.</h2>
+                        <p class="lead reveal" data-d="3">SCADA gives operators <b>visibility and control</b>. ADMS adds the intelligence on top — network modeling, advanced applications, and automation that turn raw telemetry into decisions.</p>
                     </div>
                     <div class="col-text">
                         <div class="sets reveal-scale" data-d="3">
@@ -312,8 +303,8 @@
                 <div class="kicker reveal" data-d="1" style="position:absolute; left:var(--pad); top:var(--pad); z-index:3;">// The Foundation</div>
                 <div class="split">
                     <div class="col-text">
-                        <h2 class="heading reveal" data-d="2" contenteditable>GIS is the single source of truth that feeds the ADMS.</h2>
-                        <p class="lead reveal" data-d="3" contenteditable>An accurate, connected network model starts in GIS. When that data flows cleanly downstream, every application inherits its integrity — <b>trusted data in, confident operations out</b>.</p>
+                        <h2 class="heading reveal" data-d="2">GIS is the single source of truth that feeds the ADMS.</h2>
+                        <p class="lead reveal" data-d="3">An accurate, connected network model starts in GIS. When that data flows cleanly downstream, every application inherits its integrity — <b>trusted data in, confident operations out</b>.</p>
                     </div>
                     <div class="col-text">
                         <div class="flow reveal-scale" data-d="3">
@@ -338,7 +329,7 @@
             <section class="slide slide--dark">
                 <div class="pad" style="padding-bottom:0;">
                     <div class="kicker reveal" data-d="1">// Field Results — Ho Chi Minh City</div>
-                    <h2 class="heading reveal" data-d="2" style="color:#fff;" contenteditable>Reliability you can measure.</h2>
+                    <h2 class="heading reveal" data-d="2" style="color:#fff;">Reliability you can measure.</h2>
                 </div>
                 <div class="metrics">
                     <div class="metric reveal" data-d="3" style="--w:95%;">
@@ -366,9 +357,9 @@
                 <svg class="net-bg net--dark closing-particles"></svg>
                 <div class="closing">
                     <div class="kicker reveal" data-d="1">// End of Line</div>
-                    <h2 class="reveal" data-d="2" contenteditable>Thank You</h2>
-                    <p class="sign-off reveal" data-d="3" contenteditable>Let's build smarter, more reliable grids — together.<br><b>Andrew Cruz</b> · Survalent Technology</p>
-                    <p class="contact reveal" data-d="4" contenteditable>linkedin.com/in/andrewccruz · Questions?</p>
+                    <h2 class="reveal" data-d="2">Thank You</h2>
+                    <p class="sign-off reveal" data-d="3">Let's build smarter, more reliable grids — together.<br><b>Andrew Cruz</b> · Survalent Technology</p>
+                    <p class="contact reveal" data-d="4">linkedin.com/in/andrewccruz · Questions?</p>
                 </div>
                 <div class="slide-no">07 / 07</div>
             </section>
@@ -376,9 +367,6 @@
         </main>
     </div>
 
-    <!-- === EDIT MODE === -->
-    <div class="edit-hotzone"></div>
-    <button class="edit-toggle" id="editToggle" title="Edit mode (E)">✏️</button>
     <div class="rail" id="rail"></div>
 
     <script>
@@ -548,13 +536,11 @@
                 this.currentSlide = 0;
                 this.stage = document.getElementById('deckStage');
                 this.rail = document.getElementById('rail');
-                this.isEditing = false;
                 this.counted = new Set();
                 this.setupStageScale();
                 this.setupKeyboardNav();
                 this.setupTouchNav();
                 this.setupMouseWheel();
-                this.setupEditMode();
                 this.showSlide(0);
             }
             setupStageScale() {
@@ -569,7 +555,6 @@
             }
             setupKeyboardNav() {
                 document.addEventListener('keydown', (e) => {
-                    if (document.activeElement.getAttribute('contenteditable') === 'true') return;
                     if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); this.nextSlide(); }
                     else if (e.key === 'ArrowLeft') { e.preventDefault(); this.prevSlide(); }
                     else if (e.key === 'End') this.showSlide(this.slides.length - 1);
@@ -593,27 +578,6 @@
                     if (e.deltaY > 0) this.nextSlide();
                     if (e.deltaY < 0) this.prevSlide();
                 }, { passive: true });
-            }
-            setupEditMode() {
-                const hotzone = document.querySelector('.edit-hotzone');
-                const toggle = document.getElementById('editToggle');
-                let t;
-                const show = () => { clearTimeout(t); toggle.classList.add('show'); };
-                const hide = () => { t = setTimeout(() => { if (!this.isEditing) toggle.classList.remove('show'); }, 400); };
-                hotzone.addEventListener('mouseenter', show);
-                hotzone.addEventListener('mouseleave', hide);
-                toggle.addEventListener('mouseenter', show);
-                toggle.addEventListener('mouseleave', hide);
-                toggle.addEventListener('click', () => this.toggleEditMode());
-                document.addEventListener('keydown', (e) => {
-                    if ((e.key === 'e' || e.key === 'E') && document.activeElement.getAttribute('contenteditable') !== 'true') this.toggleEditMode();
-                });
-            }
-            toggleEditMode() {
-                this.isEditing = !this.isEditing;
-                document.body.classList.toggle('editing', this.isEditing);
-                document.querySelectorAll('[contenteditable]').forEach(el => el.contentEditable = this.isEditing);
-                document.getElementById('editToggle').classList.toggle('active', this.isEditing);
             }
             animateCounters(slide) {
                 if (this.counted.has(slide)) return;
