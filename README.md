@@ -8,4 +8,4 @@ Each deck is a standalone HTML file in `decks/`.
 
 ## Skill
 
-`skills/frontend-slides/` — project-local checkout of [frontend-slides](https://github.com/zarazhangrui/frontend-slides) skill.
+`.agents/skills/frontend-slides/` — project-local checkout of [frontend-slides](https://github.com/zarazhangrui/frontend-slides) skill.
