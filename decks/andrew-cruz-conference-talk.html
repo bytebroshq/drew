@@ -48,6 +48,13 @@
             background: var(--ink);
         }
         .deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--ink); }
+
+        /* iPhone scroll-to-minimize: make the doc scrollable by exactly the toolbar's
+           height (spacer = large-viewport height) so one swipe collapses Safari's chrome.
+           The fixed .deck-viewport stays put on top; the spacer is just dead scroll room. */
+        .ios-spacer { display: none; }
+        html.ios-room, html.ios-room body { overflow: visible; height: auto; }
+        html.ios-room .ios-spacer { display: block; width: 1px; height: 100lvh; pointer-events: none; }
         .deck-stage {
             position: absolute; left: 0; top: 0;
             width: 1920px; height: 1080px;
@@ -407,6 +414,8 @@
         <small>tap to dismiss</small>
     </div>
 
+    <div class="ios-spacer" aria-hidden="true"></div>
+
     <script>
         /* === SHARED NETWORK MOTIF ===
            Each slide can orient the through-lines to its own composition via
@@ -581,6 +590,7 @@
                 this.setupMouseWheel();
                 this.setupFsHint();
                 this.setupRotateNudge();
+                this.setupIosRoom();
                 this.showSlide(0);
             }
             setupStageScale() {
@@ -648,6 +658,13 @@
                 window.addEventListener('resize', sync);
                 window.addEventListener('orientationchange', sync);
                 sync();
+            }
+            setupIosRoom() {
+                // only iPhone Safari (no Fullscreen API, coarse pointer) needs the scroll hack;
+                // tablets/desktop already have real fullscreen, so leave them non-scrolling
+                const touch = matchMedia('(pointer: coarse)').matches;
+                const noFs = !document.documentElement.requestFullscreen;
+                if (touch && noFs) document.documentElement.classList.add('ios-room');
             }
             setupTouchNav() {
                 let s = 0;
