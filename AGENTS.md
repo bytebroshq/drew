@@ -12,3 +12,13 @@ Andre Cruz's HTML slide decks. One self-contained HTML file per deck, built with
 
 - Zero dependencies — single HTML files with inline CSS/JS. No npm, no build tools.
 - Do not add build steps, frameworks, or external asset dependencies unless explicitly requested.
+
+## Deploy
+
+Static hosting via Cloudflare Workers Static Assets. No Worker script.
+
+```bash
+npx wrangler deploy
+```
+
+`decks/` is served at root. Landing page at `decks/index.html` lists all decks.
