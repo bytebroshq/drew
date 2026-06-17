@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Smart Grid &amp; Energy Management Strategy — VSIP 4</title>
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#04141b">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* === THEME — Survalent: deep teal-navy, energized teal, signal orange === */
+        :root {
+            --ink: #04141b;            /* darkest bg — keep in sync with theme-color */
+            --ink-2: #082b38;
+            --ink-3: #0c3a4a;
+            --cream: #f4f2ec;
+            --cream-2: #e7e3d8;
+            --teal: #1fc3b6;
+            --teal-deep: #0e8b86;
+            --orange: #ff7a33;
+            --orange-soft: #ffb27a;
+            --text-dark: #11201f;
+            --text-muted: #5d6f72;
+            --text-on-ink: #eaf6f5;
+            --text-on-ink-muted: #84a8ad;
+            --line-on-ink: rgba(125,196,196,.22);
+            --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+            --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* === FIXED 16:9 STAGE === */
+        html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--ink); }
+        .deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--ink); }
+        .deck-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; transform-origin: 0 0; }
+        .slide {
+            position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden;
+            visibility: hidden; opacity: 0; pointer-events: none;
+            font-family: var(--font-display); color: var(--text-dark);
+            transition: opacity 0.5s var(--ease);
+        }
+        .slide.active, .slide.visible { visibility: visible; opacity: 1; pointer-events: auto; z-index: 1; }
+        img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+        .slide--dark {
+            background:
+                radial-gradient(85% 75% at 4% 2%, rgba(31,195,182,.10) 0%, transparent 50%),
+                radial-gradient(95% 85% at 100% 100%, rgba(255,122,51,.09) 0%, transparent 52%),
+                linear-gradient(140deg, #062420 0%, #05151b 30%, #050708 58%, #160d08 82%, #241105 100%);
+            color: var(--text-on-ink);
+        }
+        .slide--light { background:
+            radial-gradient(80% 90% at 100% 0%, rgba(31,195,182,.07) 0%, transparent 55%),
+            var(--cream); }
+        .pad { position: absolute; inset: 0; padding: 96px 110px; display: flex; flex-direction: column; }
+
+        /* === TYPE HELPERS === */
+        .kicker { font-family: var(--font-mono); font-size: 19px; font-weight: 500; letter-spacing: 3px; text-transform: uppercase; color: var(--teal-deep); }
+        .slide--dark .kicker { color: var(--teal); }
+        h1 { font-weight: 700; line-height: 1.02; letter-spacing: -1.5px; }
+        h2 { font-weight: 600; line-height: 1.04; letter-spacing: -1px; }
+        .h-eyebrow { display: flex; align-items: center; gap: 16px; }
+        .h-eyebrow .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 0 5px rgba(255,122,51,.18); }
+        .lede { color: var(--text-muted); font-size: 30px; line-height: 1.45; max-width: 1180px; }
+        .slide--dark .lede { color: var(--text-on-ink-muted); }
+        .accent { color: var(--orange); }
+        .teal { color: var(--teal-deep); }
+        .slide--dark .teal { color: var(--teal); }
+        em { font-style: normal; color: var(--orange); }
+
+        /* footer note */
+        .foot { margin-top: auto; padding-top: 26px; font-family: var(--font-mono); font-size: 17px; letter-spacing: .5px; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,.08); }
+        .slide--dark .foot { color: var(--text-on-ink-muted); border-top: 1px solid var(--line-on-ink); }
+
+        /* === GRIDS === */
+        .grid { display: grid; gap: 26px; }
+        .g2 { grid-template-columns: repeat(2, 1fr); }
+        .g3 { grid-template-columns: repeat(3, 1fr); }
+        .g5 { grid-template-columns: repeat(5, 1fr); }
+
+        /* cards */
+        .card { border-radius: 18px; padding: 34px 34px 32px; background: #fff; border: 1px solid var(--cream-2); box-shadow: 0 18px 40px -28px rgba(8,43,56,.5); }
+        .slide--dark .card { background: rgba(255,255,255,.035); border: 1px solid var(--line-on-ink); box-shadow: none; }
+        .card .num { font-family: var(--font-mono); font-size: 19px; font-weight: 600; color: #fff; background: var(--teal-deep); width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; border-radius: 11px; }
+        .slide--dark .card .num { background: var(--teal-deep); color: var(--ink); }
+        .card h3 { font-size: 27px; font-weight: 600; margin: 18px 0 10px; letter-spacing: -.3px; }
+        .card p { font-size: 20px; line-height: 1.42; color: var(--text-muted); }
+        .slide--dark .card p { color: var(--text-on-ink-muted); }
+        .card.hl { border-color: var(--orange); box-shadow: 0 18px 44px -26px rgba(255,122,51,.55); }
+        .card.hl .num { background: var(--orange); }
+
+        /* stat card */
+        .stat { text-align: left; }
+        .stat .v { font-size: 64px; font-weight: 700; letter-spacing: -2px; line-height: 1; color: var(--ink); }
+        .slide--dark .stat .v { color: var(--text-on-ink); }
+        .stat .v .u { font-size: 28px; color: var(--text-muted); font-weight: 500; }
+        .slide--dark .stat .v .u { color: var(--text-on-ink-muted); }
+        .stat .l { margin-top: 14px; font-family: var(--font-mono); font-size: 17px; letter-spacing: .5px; color: var(--text-muted); line-height: 1.4; }
+        .slide--dark .stat .l { color: var(--text-on-ink-muted); }
+        .stat .v.tv { color: var(--teal-deep); }
+        .slide--dark .stat .v.tv { color: var(--teal); }
+        .stat .v.ov { color: var(--orange); }
+
+        /* checklist / two-col */
+        .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-radius: 18px; overflow: hidden; border: 1px solid var(--cream-2); }
+        .pair > div { padding: 40px 44px; }
+        .pair .lft { background: #fff; }
+        .pair .rgt { background: linear-gradient(180deg, rgba(31,195,182,.08), rgba(31,195,182,.03)); border-left: 1px solid var(--cream-2); }
+        .pair h4 { font-family: var(--font-mono); font-size: 18px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 22px; }
+        .pair .lft h4 { color: var(--teal-deep); }
+        .pair .rgt h4 { color: var(--orange); }
+        .ck { list-style: none; display: flex; flex-direction: column; gap: 17px; }
+        .ck li { display: flex; gap: 15px; font-size: 21px; line-height: 1.35; color: var(--text-dark); }
+        .slide--dark .ck li { color: var(--text-on-ink); }
+        .ck li svg { flex: none; width: 25px; height: 25px; margin-top: 2px; stroke: var(--teal-deep); stroke-width: 2.4; fill: none; }
+        .pair .rgt .ck li svg { stroke: var(--orange); }
+
+        /* pills */
+        .pills { display: flex; flex-wrap: wrap; gap: 13px; }
+        .pill { font-family: var(--font-mono); font-size: 18px; letter-spacing: .5px; padding: 10px 18px; border-radius: 30px; background: rgba(31,195,182,.12); color: var(--teal-deep); border: 1px solid rgba(31,195,182,.3); }
+        .slide--dark .pill { background: rgba(31,195,182,.1); color: var(--teal); border-color: var(--line-on-ink); }
+
+        /* === SECTION DIVIDER === */
+        .divider .pad { justify-content: center; }
+        .divider .sec-no { font-family: var(--font-mono); font-size: 24px; letter-spacing: 6px; color: var(--orange); }
+        .divider h2 { font-size: 118px; margin: 22px 0 30px; max-width: 1400px; }
+        .divider .sub { font-size: 28px; color: var(--text-on-ink-muted); max-width: 1000px; line-height: 1.4; }
+        .divider .bar { width: 120px; height: 5px; background: var(--teal); border-radius: 3px; margin-bottom: 40px; }
+
+        /* === PLATFORM STACK (slide 10) === */
+        .stack { display: flex; flex-direction: column; gap: 14px; flex: 1; }
+        .layer { display: flex; align-items: center; gap: 28px; padding: 22px 30px; border-radius: 14px; border: 1px solid var(--line-on-ink); background: rgba(255,255,255,.035); }
+        .layer .tag { font-family: var(--font-mono); font-size: 17px; font-weight: 600; letter-spacing: 1px; color: var(--ink); background: var(--teal); padding: 8px 14px; border-radius: 8px; min-width: 132px; text-align: center; }
+        .layer .ld h3 { font-size: 25px; font-weight: 600; color: var(--text-on-ink); }
+        .layer .ld p { font-size: 18px; color: var(--text-on-ink-muted); margin-top: 4px; }
+        .layer.vpp { border-color: var(--orange); background: linear-gradient(90deg, rgba(255,122,51,.14), rgba(255,122,51,.04)); }
+        .layer.vpp .tag { background: var(--orange); }
+
+        /* === ARCHITECTURE (slide 14) === */
+        .arch { flex: 1; display: flex; flex-direction: column; gap: 0; position: relative; justify-content: center; }
+        .arch .tier { display: flex; justify-content: center; gap: 22px; position: relative; z-index: 2; }
+        .arch .conn { height: 30px; position: relative; }
+        .arch .node { background: rgba(255,255,255,.04); border: 1px solid var(--line-on-ink); border-radius: 12px; padding: 16px 26px; text-align: center; min-width: 200px; }
+        .arch .node .t { font-size: 21px; font-weight: 600; color: var(--text-on-ink); }
+        .arch .node .s { font-family: var(--font-mono); font-size: 15px; color: var(--text-on-ink-muted); margin-top: 3px; }
+        .arch .node.grid { border-color: var(--teal); }
+        .arch .node.der { border-color: var(--orange); background: rgba(255,122,51,.06); }
+        .arch .factory { display: flex; flex-direction: column; gap: 6px; padding: 14px; }
+        .arch .factory .chip { font-family: var(--font-mono); font-size: 14px; padding: 6px 8px; border-radius: 7px; }
+        .arch .platform-band { margin-top: 22px; border: 1px dashed var(--teal); border-radius: 12px; padding: 18px 26px; text-align: center; background: rgba(31,195,182,.06); }
+        .arch .platform-band .t { font-size: 22px; font-weight: 600; color: var(--teal); }
+        .arch .platform-band .s { font-size: 17px; color: var(--text-on-ink-muted); margin-top: 4px; }
+
+        /* === FLOW (zero-export, black start) === */
+        .flow { display: flex; align-items: stretch; gap: 0; flex-wrap: wrap; }
+        .flow .step { flex: 1; min-width: 0; background: #fff; border: 1px solid var(--cream-2); border-radius: 14px; padding: 26px 24px; }
+        .slide--dark .flow .step { background: rgba(255,255,255,.04); border-color: var(--line-on-ink); }
+        .flow .step .n { font-family: var(--font-mono); font-size: 16px; color: var(--orange); letter-spacing: 1px; }
+        .flow .step h3 { font-size: 22px; font-weight: 600; margin: 10px 0 6px; }
+        .slide--dark .flow .step h3 { color: var(--text-on-ink); }
+        .flow .step p { font-size: 18px; line-height: 1.35; color: var(--text-muted); }
+        .slide--dark .flow .step p { color: var(--text-on-ink-muted); }
+        .flow .arrow { display: flex; align-items: center; padding: 0 14px; color: var(--teal-deep); font-size: 30px; }
+        .slide--dark .flow .arrow { color: var(--teal); }
+
+        /* === TIMELINE (roadmap) === */
+        .tl { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; flex: 1; align-content: center; }
+        .tl .lane { background: #fff; border: 1px solid var(--cream-2); border-radius: 16px; padding: 26px 22px; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        .slide--dark .tl .lane { background: rgba(255,255,255,.04); border-color: var(--line-on-ink); }
+        .tl .lane::before { content: ""; position: absolute; left: 0; top: 0; height: 6px; width: 100%; background: var(--teal); opacity: calc(.4 + var(--i) * .15); }
+        .tl .lane.last::before { background: var(--orange); }
+        .tl .lane .ph { font-family: var(--font-mono); font-size: 15px; color: var(--text-muted); letter-spacing: .5px; margin-top: 6px; }
+        .slide--dark .tl .lane .ph { color: var(--text-on-ink-muted); }
+        .tl .lane h3 { font-size: 22px; font-weight: 600; margin: 4px 0 14px; letter-spacing: -.3px; }
+        .slide--dark .tl .lane h3 { color: var(--text-on-ink); }
+        .tl .lane ul { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+        .tl .lane li { font-size: 16px; line-height: 1.3; color: var(--text-muted); padding-left: 16px; position: relative; }
+        .slide--dark .tl .lane li { color: var(--text-on-ink-muted); }
+        .tl .lane li::before { content: ""; position: absolute; left: 0; top: 9px; width: 6px; height: 6px; border-radius: 50%; background: var(--teal-deep); }
+        .tl .lane.last li::before { background: var(--orange); }
+
+        /* === AGENDA (large numbers, no cards) === */
+        .agenda { display: flex; flex-direction: column; flex: 1; justify-content: center; }
+        .ag { display: flex; align-items: center; gap: 44px; padding: 26px 6px; border-top: 1px solid rgba(8,43,56,.12); }
+        .ag:last-child { border-bottom: 1px solid rgba(8,43,56,.12); }
+        .ag .agn { font-family: var(--font-mono); font-size: 72px; font-weight: 500; letter-spacing: -3px; line-height: 1; color: var(--teal-deep); min-width: 118px; }
+        .ag .agt h3 { font-size: 33px; font-weight: 600; letter-spacing: -.4px; }
+        .ag .agt p { font-size: 21px; color: var(--text-muted); margin-top: 5px; }
+        .ag.hl .agn { color: var(--orange); }
+        .ag.hl .agt h3 { color: var(--orange); }
+
+        /* === ROADMAP GANTT (slide 18 — overlapping capability layers) === */
+        .gantt { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 12px;
+            background-image: linear-gradient(90deg, rgba(8,43,56,.07) 1px, transparent 1px);
+            background-size: 16.666% 100%; background-position: 0 0; padding-bottom: 8px; }
+        .gantt .row { position: relative; height: 92px; }
+        .gantt .bar { position: absolute; top: 0; bottom: 0; border-radius: 13px; padding: 0 28px;
+            display: flex; flex-direction: column; justify-content: center;
+            background: linear-gradient(90deg, rgba(31,195,182,.18), rgba(31,195,182,.07));
+            border: 1px solid rgba(14,139,134,.30); }
+        .gantt .bar .ph { font-family: var(--font-mono); font-size: 14px; letter-spacing: .5px; color: var(--teal-deep); }
+        .gantt .bar h3 { font-size: 25px; font-weight: 600; letter-spacing: -.4px; margin-top: 4px; white-space: nowrap; }
+        .gantt .bar.last { background: linear-gradient(90deg, rgba(255,122,51,.20), rgba(255,122,51,.06)); border-color: rgba(255,122,51,.42); }
+        .gantt .bar.last .ph { color: var(--orange); }
+        .gantt .axis { display: flex; justify-content: space-between; margin-top: 6px; font-family: var(--font-mono); font-size: 15px; color: var(--text-muted); border-top: 1px solid rgba(8,43,56,.14); padding-top: 10px; }
+
+        /* big quote */
+        .quote { font-size: 58px; font-weight: 600; line-height: 1.12; letter-spacing: -1px; max-width: 1500px; }
+        .quote .accent { color: var(--orange); }
+
+        /* === CONTROLS / HELPERS (engine) === */
+        .deck-controls { position: fixed; right: 26px; bottom: 22px; z-index: 1000; font-family: var(--font-mono); font-size: 14px; letter-spacing: 2px; color: var(--text-muted); background: rgba(255,255,255,.75); padding: 7px 14px; border-radius: 20px; backdrop-filter: blur(6px); }
+        .rail { position: fixed; left: 0; bottom: 0; height: 3px; background: var(--orange); z-index: 1000; transition: width .5s var(--ease); }
+        .fs-hint { position: fixed; right: 26px; bottom: 38px; z-index: 1001; display: inline-flex; align-items: center; gap: 9px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 1.5px; color: var(--text-muted); background: rgba(255,255,255,.78); padding: 9px 15px; border: 0; border-radius: 22px; cursor: pointer; backdrop-filter: blur(6px); box-shadow: 0 4px 18px rgba(0,0,0,.08); transition: opacity .5s var(--ease), transform .5s var(--ease); }
+        .fs-hint:hover { color: var(--text-dark); }
+        .fs-hint svg { width: 15px; height: 15px; stroke: currentColor; stroke-width: 2; fill: none; }
+        .fs-hint kbd { font: inherit; padding: 1px 6px; border-radius: 5px; background: rgba(0,0,0,.06); }
+        .fs-hint.hide { opacity: 0; transform: translateY(8px); pointer-events: none; }
+        .rotate-nudge { position: fixed; inset: 0; z-index: 1002; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; background: rgba(4,20,27,.93); color: var(--text-on-ink); backdrop-filter: blur(4px); font-family: var(--font-mono); font-size: 15px; letter-spacing: 1px; text-align: center; padding: 32px; transition: opacity .5s var(--ease); }
+        .rotate-nudge.hide { opacity: 0; pointer-events: none; }
+        .rotate-nudge svg { width: 52px; height: 52px; stroke: currentColor; stroke-width: 1.6; fill: none; animation: tilt 2.4s var(--ease) infinite; }
+        @keyframes tilt { 0%, 55%, 100% { transform: rotate(0); } 75%, 95% { transform: rotate(-90deg); } }
+        .rotate-nudge small { color: var(--text-on-ink-muted); letter-spacing: 1.5px; }
+        .tap-hint { position: fixed; top: 50%; z-index: 1001; transform: translateY(-50%); display: none; align-items: center; justify-content: center; width: 46px; height: 46px; border: 0; border-radius: 50%; color: var(--text-muted); background: rgba(255,255,255,.78); backdrop-filter: blur(6px); box-shadow: 0 4px 18px rgba(0,0,0,.08); transition: opacity .5s var(--ease); }
+        .tap-hint svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; }
+        .tap-hint--prev { left: 18px; }
+        .tap-hint--next { right: 18px; }
+        .tap-hint.show { display: inline-flex; }
+        .tap-hint.hide { opacity: 0; pointer-events: none; }
+
+        /* iPhone scroll-to-minimize */
+        .ios-spacer { display: none; }
+        html.ios-room, html.ios-room body { overflow: visible; height: auto; }
+        html.ios-room .ios-spacer { display: block; width: 1px; height: 100lvh; pointer-events: none; }
+
+        /* === REVEAL === */
+        .reveal { opacity: 0; transform: translateY(24px); transition: opacity var(--ease) .7s, transform var(--ease) .7s; }
+        .slide.visible .reveal { opacity: 1; transform: none; }
+        .slide.visible [data-d="1"] { transition-delay: .10s; }
+        .slide.visible [data-d="2"] { transition-delay: .20s; }
+        .slide.visible [data-d="3"] { transition-delay: .30s; }
+        .slide.visible [data-d="4"] { transition-delay: .40s; }
+        .slide.visible [data-d="5"] { transition-delay: .50s; }
+        .slide.visible [data-d="6"] { transition-delay: .60s; }
+
+        /* === FRAGMENTS (step-through reveal on advance) === */
+        .frag { opacity: 0; transform: translateY(16px); transition: opacity .5s var(--ease), transform .5s var(--ease); }
+        .frag.frag-in { opacity: 1; transform: none; }
+        .flow .arrow.frag { transform: scale(.5); }
+        .flow .arrow.frag.frag-in { transform: none; }
+
+        /* zero-export live enforcement meter (slide 15, step 04) */
+        .zx { margin-top: 16px; }
+        .zx .bar { position: relative; height: 12px; border-radius: 7px; background: rgba(255,122,51,.16); }
+        .zx .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 70%; border-radius: 7px; background: var(--teal); }
+        .slide.visible .frag-in .zx .fill { animation: zxpulse 3.8s var(--ease) infinite; }
+        .zx .lim { position: absolute; top: -5px; bottom: -5px; left: 70%; width: 2px; background: var(--orange); }
+        .zx .cap { display: flex; justify-content: space-between; margin-top: 9px; font-family: var(--font-mono); font-size: 13px; letter-spacing: .5px; color: var(--text-muted); }
+        @keyframes zxpulse {
+            0%   { width: 18%; background: var(--teal); }
+            34%  { width: 90%; background: var(--teal); }
+            46%  { width: 90%; background: var(--orange); }
+            64%  { width: 70%; background: var(--orange); }
+            78%  { width: 70%; background: var(--teal); }
+            100% { width: 18%; background: var(--teal); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .2s !important; }
+            .zx .fill { animation: none !important; width: 70% !important; }
+        }
+
+        @media print {
+            html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+            .deck-viewport, .deck-stage { position: static; width: auto; height: auto; transform: none !important; overflow: visible; }
+            .slide { position: relative; visibility: visible !important; opacity: 1 !important; width: 1920px; height: 1080px; break-after: page; page-break-after: always; }
+            .slide:last-child { break-after: auto; }
+            .frag { opacity: 1 !important; transform: none !important; }
+            .zx .fill { animation: none !important; }
+            .deck-controls, .rail, .fs-hint, .rotate-nudge, .tap-hint { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="deck-viewport">
+        <main class="deck-stage" id="deckStage">
+
+            <!-- 1 · TITLE -->
+            <section class="slide slide--dark active">
+                <div class="pad" style="justify-content:center">
+                    <div class="kicker reveal" data-d="1">Survalent APAC · Confidential</div>
+                    <h1 class="reveal" data-d="2" style="font-size:104px;margin-top:28px">Smart Grid &amp; Energy<br>Management <em>Strategy</em></h1>
+                    <p class="reveal" data-d="3" style="font-size:34px;color:var(--text-on-ink-muted);margin-top:30px;max-width:1200px">A consultative roadmap for the VSIP 4 Industrial Park</p>
+                    <div class="foot reveal" data-d="4" style="display:flex;gap:48px;flex-wrap:wrap">
+                        <span>Andrew Cruz · Rudy · Max — Survalent</span>
+                        <span>June 26, 2026 · 9:00 AM · VSIP I Office</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2 · AGENDA -->
+            <section class="slide slide--light">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Today's Agenda</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:60px;margin:20px 0 30px">Six things, one hour</h2>
+                    <div class="agenda">
+                        <div class="ag reveal" data-d="1"><span class="agn">01</span><div class="agt"><h3>VSIP 4's vision &amp; parameters</h3><p>The scale, the goals, the numbers we're designing around.</p></div></div>
+                        <div class="ag reveal" data-d="2"><span class="agn">02</span><div class="agt"><h3>What we know &amp; design around</h3><p>Confirmed facts from our consultation — and what they imply.</p></div></div>
+                        <div class="ag reveal" data-d="3"><span class="agn">03</span><div class="agt"><h3>The SurvalentONE platform</h3><p>Grid-first ADMS + DERMS, proven in 24/7 control rooms.</p></div></div>
+                        <div class="ag reveal" data-d="4"><span class="agn">04</span><div class="agt"><h3>Recommended architecture</h3><p>How the pieces fit for 200 MW of load and 187 MW of RTS.</p></div></div>
+                        <div class="ag reveal" data-d="5"><span class="agn">05</span><div class="agt"><h3>Implementation roadmap</h3><p>Full delivery in 2–3 years, anchored to a 50-year vision.</p></div></div>
+                        <div class="ag hl reveal" data-d="6"><span class="agn">06</span><div class="agt"><h3>Decisions &amp; next steps</h3><p>What to lock in today to shape the Q4 tender.</p></div></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3 · DIVIDER -->
+            <section class="slide slide--dark divider">
+                <div class="pad">
+                    <div class="bar reveal" data-d="1"></div>
+                    <div class="sec-no reveal" data-d="1">SECTION 01</div>
+                    <h2 class="reveal" data-d="2">Understanding<br>your vision</h2>
+                    <p class="sub reveal" data-d="3">Green, smart, zero-carbon — built for 50 years of industrial growth.</p>
+                </div>
+            </section>
+
+            <!-- 4 · VSIP 4 AT A GLANCE -->
+            <section class="slide slide--light">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">VSIP 4 at a Glance</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:58px;margin:20px 0 46px">A 750-hectare energy platform</h2>
+                    <div class="grid g5 reveal" data-d="2" style="margin-bottom:50px">
+                        <div class="stat"><div class="v">750<span class="u"> ha</span></div><div class="l">Total park area</div></div>
+                        <div class="stat"><div class="v tv">3×</div><div class="l">110/22kV substations</div></div>
+                        <div class="stat"><div class="v">~200<span class="u"> MW</span></div><div class="l">Peak load</div></div>
+                        <div class="stat"><div class="v ov">187<span class="u"> MW</span></div><div class="l">Rooftop solar (RTS)</div></div>
+                        <div class="stat"><div class="v tv">50–100<span class="u"> MWh</span></div><div class="l">Distributed BESS</div></div>
+                    </div>
+                    <div class="pills reveal" data-d="3">
+                        <span class="pill">Greenfield build</span>
+                        <span class="pill">VSIP-owned RTS</span>
+                        <span class="pill">Factory-level BESS + microgrids</span>
+                        <span class="pill">Zero-export to grid</span>
+                        <span class="pill">IEC-104 · Modbus</span>
+                    </div>
+                    <div class="foot reveal" data-d="4">Design parameters — validated through our consultation with MP / VSIP.</div>
+                </div>
+            </section>
+
+            <!-- 5 · YOUR VISION -->
+            <section class="slide slide--dark">
+                <div class="pad">
+                    <div class="kicker reveal" data-d="1">Your Vision</div>
+                    <p class="quote reveal" data-d="2" style="margin:26px 0 56px">VSIP 4 is not just an industrial park. It's a <span class="accent">platform for the energy future</span> of Vietnamese industry.</p>
+                    <div class="grid g3" style="margin-top:auto">
+                        <div class="card reveal" data-d="3"><h3 class="teal">Reliability</h3><p>Premium tenants never lose power — resilience engineered into the grid, not bolted on.</p></div>
+                        <div class="card reveal" data-d="4"><h3 class="teal">Sustainability</h3><p>Zero carbon, ESG-ready. 187 MW of solar, managed to zero-export obligations.</p></div>
+                        <div class="card reveal" data-d="5"><h3 class="teal">Intelligence</h3><p>Data-driven and automated — architected for 50 years of load and DER growth.</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6 · DIVIDER -->
+            <section class="slide slide--dark divider">
+                <div class="pad">
+                    <div class="bar reveal" data-d="1"></div>
+                    <div class="sec-no reveal" data-d="1">SECTION 02</div>
+                    <h2 class="reveal" data-d="2">What we know</h2>
+                    <p class="sub reveal" data-d="3">We did the homework. Most of the open questions are already closed.</p>
+                </div>
+            </section>
+
+            <!-- 7 · WHAT WE'VE CONFIRMED -->
+            <section class="slide slide--light">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">What We've Confirmed</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:56px;margin:20px 0 40px">Confirmed facts shape the design</h2>
+                    <div class="pair reveal" data-d="2" style="flex:1">
+                        <div class="lft">
+                            <h4>Confirmed</h4>
+                            <ul class="ck">
+                                <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>100% greenfield — no legacy ADMS dependency</li>
+                                <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>VSIP owns &amp; operates all 187 MW of RTS</li>
+                                <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>BESS distributed at factories with local microgrid controllers</li>
+                                <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>2–3 year delivery target · 50-year architectural vision</li>
+                                <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>IEC-104 &amp; Modbus protocols</li>
+                            </ul>
+                        </div>
+                        <div class="rgt">
+                            <h4>What this means for design</h4>
+                            <ul class="ck">
+                                <li><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>No migration baggage — architect clean from day one</li>
+                                <li><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Direct curtailment &amp; dispatch — no tenant-negotiation layer</li>
+                                <li><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Islanding uses many BESS units, coordinated centrally</li>
+                                <li><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>One unified platform, deployed in capability layers</li>
+                                <li><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Multi-vendor integration is a known, solved problem</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="foot reveal" data-d="3">These confirmed facts shape the architecture we're recommending today.</div>
+                </div>
+            </section>
+
+            <!-- 8 · DIVIDER -->
+            <section class="slide slide--dark divider">
+                <div class="pad">
+                    <div class="bar reveal" data-d="1"></div>
+                    <div class="sec-no reveal" data-d="1">SECTION 03</div>
+                    <h2 class="reveal" data-d="2">The Survalent<br>platform</h2>
+                    <p class="sub reveal" data-d="3">Built for utility operations. Proven in 24/7 control room environments.</p>
+                </div>
+            </section>
+
+            <!-- 9 · WHY GRID-FIRST -->
+            <section class="slide slide--light">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Why a Grid-First Platform</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:50px;margin:20px 0 18px;max-width:1500px">187 MW of solar + BESS + 200 MW of load is a <span class="teal">grid operations</span> problem — not a market-aggregation one</h2>
+                    <p class="lede reveal" data-d="2" style="margin-bottom:42px">Without a platform built for the network, three things break:</p>
+                    <div class="grid g3" style="flex:1;align-content:start">
+                        <div class="card reveal" data-d="3"><span class="num">1</span><h3>No DER visibility</h3><p>You can't see how distributed solar is impacting the 22kV network in real time.</p></div>
+                        <div class="card reveal" data-d="4"><span class="num">2</span><h3>Zero-export can't hold</h3><p>Enforcing export limits reliably requires live topology awareness, not spreadsheets.</p></div>
+                        <div class="card reveal" data-d="5"><span class="num">3</span><h3>Islanding fails</h3><p>Black start and island formation need tight SCADA + DERMS integration.</p></div>
+                    </div>
+                    <div class="foot reveal" data-d="6">SurvalentONE is built for the control room — the same place this grid will be run.</div>
+                </div>
+            </section>
+
+            <!-- 10 · PLATFORM OVERVIEW (stack) -->
+            <section class="slide slide--dark">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">SurvalentONE ADMS + DERMS</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:48px;margin:18px 0 30px">One platform, five layers</h2>
+                    <div style="display:flex;gap:40px;flex:1">
+                        <div class="stack" style="flex:1.7">
+                            <div class="layer reveal" data-d="1"><span class="tag">SCADA</span><div class="ld"><h3>Real-time acquisition</h3><p>Live data from every device on the network</p></div></div>
+                            <div class="layer reveal" data-d="2"><span class="tag">ADMS</span><div class="ld"><h3>Topology · OMS · FLISR · Volt/VAR</h3><p>Operate and self-heal the 22kV distribution network</p></div></div>
+                            <div class="layer reveal" data-d="3"><span class="tag">DERMS</span><div class="ld"><h3>RTS monitoring · curtailment · zero-export · forecasting</h3><p>Manage 187 MW of solar against grid limits</p></div></div>
+                            <div class="layer reveal" data-d="4"><span class="tag">Microgrid</span><div class="ld"><h3>BESS dispatch · islanding · black start</h3><p>Local controllers at factory level</p></div></div>
+                            <div class="layer vpp reveal" data-d="5"><span class="tag">VPP</span><div class="ld"><h3>SurvalentONE <span class="accent">is</span> the VPP</h3><p>Aggregation, optimization, and dispatch of RTS + BESS</p></div></div>
+                        </div>
+                        <div class="reveal" data-d="6" style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:18px">
+                            <p style="font-family:var(--font-mono);font-size:17px;letter-spacing:1.5px;color:var(--text-on-ink-muted);text-transform:uppercase">Speaks every protocol</p>
+                            <div class="pills">
+                                <span class="pill">IEC-104</span><span class="pill">Modbus</span><span class="pill">IEC 61850</span>
+                                <span class="pill">DNP3</span><span class="pill">IEEE 2030.5</span><span class="pill">REST API</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 11 · KEY CAPABILITIES -->
+            <section class="slide slide--light">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Key Capabilities for VSIP 4</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:54px;margin:20px 0 40px">What the platform does</h2>
+                    <div class="grid g3" style="flex:1;align-content:center">
+                        <div class="card hl reveal" data-d="1"><span class="num">A</span><h3>ADMS</h3><p>Grid topology, FLISR self-healing, real-time distribution operations.</p></div>
+                        <div class="card hl reveal" data-d="2"><span class="num">D</span><h3>DERMS</h3><p>RTS generation management, curtailment, zero-export enforcement.</p></div>
+                        <div class="card reveal" data-d="3"><span class="num">M</span><h3>Microgrid + BESS</h3><p>Distributed BESS dispatch and local island formation per factory.</p></div>
+                        <div class="card reveal" data-d="4"><span class="num">I</span><h3>Multi-vendor integration</h3><p>IEC-104, Modbus, DNP3, IEC 61850 across every asset class.</p></div>
+                        <div class="card reveal" data-d="5"><span class="num">S</span><h3>Industrial cybersecurity</h3><p>OT-grade security designed in from day one, not patched later.</p></div>
+                        <div class="card reveal" data-d="6"><span class="num">V</span><h3>Built-in VPP</h3><p>Aggregates and dispatches RTS + BESS as a virtual power plant.</p></div>
+                    </div>
+                    <div class="foot reveal" data-d="6">ADMS and DERMS are the immediate priorities — the rest layers on as VSIP 4 grows.</div>
+                </div>
+            </section>
+
+            <!-- 12 · PROVEN AT SCALE -->
+            <section class="slide slide--dark">
+                <div class="pad" style="justify-content:center">
+                    <div class="kicker reveal" data-d="1">Proven at Scale · Ho Chi Minh City</div>
+                    <div class="reveal" data-d="2" style="display:flex;gap:90px;align-items:baseline;margin:38px 0 30px;flex-wrap:wrap">
+                        <div><div data-count="95" data-suf="%" style="font-size:140px;font-weight:700;letter-spacing:-4px;line-height:.9;color:var(--teal)">95%</div><div class="l" style="font-family:var(--font-mono);font-size:22px;color:var(--text-on-ink-muted);margin-top:10px">SAIDI reduction</div></div>
+                        <div><div data-count="93" data-suf="%" style="font-size:140px;font-weight:700;letter-spacing:-4px;line-height:.9;color:var(--orange)">93%</div><div class="l" style="font-family:var(--font-mono);font-size:22px;color:var(--text-on-ink-muted);margin-top:10px">SAIFI reduction</div></div>
+                        <div><div data-count="2.72" data-dec="2" data-suf="M" style="font-size:140px;font-weight:700;letter-spacing:-4px;line-height:.9;color:var(--text-on-ink)">2.72M</div><div class="l" style="font-family:var(--font-mono);font-size:22px;color:var(--text-on-ink-muted);margin-top:10px">meters served</div></div>
+                    </div>
+                    <p class="reveal" data-d="3" style="font-size:34px;line-height:1.4;color:var(--text-on-ink-muted);max-width:1400px;margin-top:20px">The same SurvalentONE FLISR platform running <span class="teal">Vietnam's largest utility</span> can be architected for VSIP 4's specific requirements.</p>
+                </div>
+            </section>
+
+            <!-- 13 · DIVIDER -->
+            <section class="slide slide--dark divider">
+                <div class="pad">
+                    <div class="bar reveal" data-d="1"></div>
+                    <div class="sec-no reveal" data-d="1">SECTION 04</div>
+                    <h2 class="reveal" data-d="2">Recommended<br>architecture</h2>
+                    <p class="sub reveal" data-d="3">Distributed by design — every factory a self-sustaining microgrid node.</p>
+                </div>
+            </section>
+
+            <!-- 14 · SYSTEM ARCHITECTURE -->
+            <section class="slide slide--dark">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">VSIP 4 System Architecture · Conceptual</span></div>
+                    <div class="arch">
+                        <div class="tier reveal" data-d="1">
+                            <div class="node grid"><div class="t">National Grid</div><div class="s">110kV connection</div></div>
+                        </div>
+                        <div class="conn"></div>
+                        <div class="tier reveal" data-d="2">
+                            <div class="node grid"><div class="t">Substation A</div><div class="s">110/22kV</div></div>
+                            <div class="node grid"><div class="t">Substation B</div><div class="s">110/22kV</div></div>
+                            <div class="node grid"><div class="t">Substation C</div><div class="s">110/22kV</div></div>
+                        </div>
+                        <div class="conn"></div>
+                        <div class="tier reveal" data-d="3" style="align-items:stretch">
+                            <div class="node factory"><div class="t" style="margin-bottom:6px">Factory node ×N</div><div class="chip" style="background:rgba(255,122,51,.14);color:var(--orange-soft)">RTS solar</div><div class="chip" style="background:rgba(255,122,51,.14);color:var(--orange-soft)">Local BESS</div><div class="chip" style="background:rgba(31,195,182,.14);color:var(--teal)">Microgrid Controller</div></div>
+                            <div class="node factory"><div class="t" style="margin-bottom:6px">Factory node ×N</div><div class="chip" style="background:rgba(255,122,51,.14);color:var(--orange-soft)">RTS solar</div><div class="chip" style="background:rgba(255,122,51,.14);color:var(--orange-soft)">Local BESS</div><div class="chip" style="background:rgba(31,195,182,.14);color:var(--teal)">Microgrid Controller</div></div>
+                            <div class="node factory"><div class="t" style="margin-bottom:6px">22kV feeders</div><div class="chip" style="background:rgba(255,255,255,.06);color:var(--text-on-ink-muted)">Reclosers</div><div class="chip" style="background:rgba(255,255,255,.06);color:var(--text-on-ink-muted)">LBS</div><div class="chip" style="background:rgba(255,255,255,.06);color:var(--text-on-ink-muted)">RMUs</div></div>
+                        </div>
+                        <div class="platform-band reveal" data-d="4">
+                            <div class="t">SurvalentONE ADMS + DERMS — central intelligence layer</div>
+                            <div class="s">Connects to every node · BESS is distributed — each factory is a self-sustaining microgrid</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 15 · ZERO-EXPORT -->
+            <section class="slide slide--light">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Zero-Export Control Strategy</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:50px;margin:20px 0 14px">A regulatory obligation, enforced in real time</h2>
+                    <p class="lede reveal" data-d="2" style="margin-bottom:40px">VSIP owns the RTS — so curtailment is direct, with no tenant permission needed.</p>
+                    <div class="flow" style="margin-bottom:auto">
+                        <div class="step frag" data-fg="1"><div class="n">01</div><h3>RTS generation</h3><p>187 MW of solar producing across the park.</p></div>
+                        <div class="arrow frag" data-fg="2">→</div>
+                        <div class="step frag" data-fg="2"><div class="n">02</div><h3>POI measurement</h3><p>Live metering at the point of interconnection.</p></div>
+                        <div class="arrow frag" data-fg="3">→</div>
+                        <div class="step frag" data-fg="3"><div class="n">03</div><h3>DERMS compares</h3><p>Checks export against the grid limit continuously.</p></div>
+                        <div class="arrow frag" data-fg="4">→</div>
+                        <div class="step hl frag" data-fg="4" style="border-color:var(--orange)"><div class="n">04</div><h3>Enforce</h3><p>Curtail RTS · charge local BESS · alert operator.</p>
+                            <div class="zx"><div class="bar"><div class="fill"></div><div class="lim"></div></div><div class="cap"><span>Export to grid</span><span style="color:var(--orange)">Limit — held</span></div></div>
+                        </div>
+                    </div>
+                    <p class="quote frag" data-fg="5" style="font-size:40px;margin-top:46px;max-width:1500px">Zero export is not a feature. It's a <span class="accent">regulatory obligation</span> — designed in from day one.</p>
+                </div>
+            </section>
+
+            <!-- 16 · ISLANDING & BLACK START -->
+            <section class="slide slide--dark">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Islanding &amp; Black Start</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:50px;margin:20px 0 36px">When the national grid trips, the park keeps running</h2>
+                    <div style="display:flex;gap:46px;flex:1">
+                        <div class="reveal" data-d="2" style="flex:1.1">
+                            <p style="font-family:var(--font-mono);font-size:18px;letter-spacing:1.5px;color:var(--teal);text-transform:uppercase;margin-bottom:24px">Restoration sequence</p>
+                            <div class="flow" style="flex-direction:column;gap:14px">
+                                <div class="step frag" data-fg="1" style="flex:none"><div class="n">01</div><h3>Each factory islands</h3><p>Local microgrid controller + BESS forms an island.</p></div>
+                                <div class="step frag" data-fg="2" style="flex:none"><div class="n">02</div><h3>Black start</h3><p>BESS energizes the local bus → RTS reconnects → loads restored by priority.</p></div>
+                                <div class="step frag" data-fg="3" style="flex:none"><div class="n">03</div><h3>Central coordination</h3><p>DERMS stabilizes across islands for park-wide balance.</p></div>
+                            </div>
+                        </div>
+                        <div class="frag" data-fg="4" style="flex:1;display:flex;flex-direction:column;justify-content:center">
+                            <p style="font-family:var(--font-mono);font-size:18px;letter-spacing:1.5px;color:var(--orange);text-transform:uppercase;margin-bottom:20px">Requires</p>
+                            <ul class="ck" style="margin-bottom:40px">
+                                <li><svg viewBox="0 0 24 24" style="stroke:var(--orange)"><path d="M20 6 9 17l-5-5"/></svg>Grid-forming inverters</li>
+                                <li><svg viewBox="0 0 24 24" style="stroke:var(--orange)"><path d="M20 6 9 17l-5-5"/></svg>Protection coordination</li>
+                                <li><svg viewBox="0 0 24 24" style="stroke:var(--orange)"><path d="M20 6 9 17l-5-5"/></svg>Defined island boundaries</li>
+                            </ul>
+                            <p class="quote" style="font-size:38px">Islanding is what lets VSIP tell premium tenants: <span class="accent">you will never lose power.</span></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 17 · DIVIDER -->
+            <section class="slide slide--dark divider">
+                <div class="pad">
+                    <div class="bar reveal" data-d="1"></div>
+                    <div class="sec-no reveal" data-d="1">SECTION 05</div>
+                    <h2 class="reveal" data-d="2">Your implementation<br>roadmap</h2>
+                    <p class="sub reveal" data-d="3">Capability layers that accumulate — designed up front, deployed incrementally.</p>
+                </div>
+            </section>
+
+            <!-- 18 · CAPABILITY ROADMAP -->
+            <section class="slide slide--light">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Capability Roadmap · 2–3 Year Delivery</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:48px;margin:18px 0 32px">Five layers, one platform</h2>
+                    <div class="gantt">
+                        <div class="row"><div class="bar frag" data-fg="1" style="left:0%;width:16.7%"><span class="ph">M0–6</span><h3>Foundation</h3></div></div>
+                        <div class="row"><div class="bar frag" data-fg="2" style="left:11.1%;width:22.2%"><span class="ph">M4–12</span><h3>Grid Intelligence</h3></div></div>
+                        <div class="row"><div class="bar frag" data-fg="3" style="left:27.8%;width:27.8%"><span class="ph">M10–20</span><h3>Renewable Integration</h3></div></div>
+                        <div class="row"><div class="bar frag" data-fg="4" style="left:44.4%;width:33.3%"><span class="ph">M16–28</span><h3>Microgrid &amp; Resilience</h3></div></div>
+                        <div class="row"><div class="bar last frag" data-fg="5" style="left:66.7%;width:33.3%"><span class="ph">M24–36</span><h3>Smart Energy Ecosystem</h3></div></div>
+                        <div class="axis" aria-hidden="true"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span><span>30</span><span>36</span></div>
+                    </div>
+                    <div class="foot frag" data-fg="6">Each layer starts before the last one finishes — one platform, designed together, deployed in overlapping waves. Built to grow for 50 years.</div>
+                </div>
+            </section>
+
+            <!-- 19 · FOUNDATION DEEP DIVE -->
+            <section class="slide slide--dark">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Layers 1–2 · Deep Dive</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:50px;margin:20px 0 16px">The first 12 months determine the next 50 years</h2>
+                    <p class="lede reveal" data-d="2" style="margin-bottom:42px">Foundation decisions are architectural, not procurement line items.</p>
+                    <div class="grid g2" style="margin-bottom:auto">
+                        <div class="card reveal" data-d="3"><h3 class="teal">Foundation (0–6)</h3><p>Comms backbone, OT security, and the data model — the choices that either unlock or constrain everything that follows.</p></div>
+                        <div class="card reveal" data-d="4"><h3 class="teal">Grid Intelligence (4–12)</h3><p>ADMS goes live. Zero-export monitoring starts here — before full DERMS — so the obligation is covered early.</p></div>
+                    </div>
+                    <p class="quote reveal" data-d="5" style="font-size:38px;margin-top:46px;max-width:1550px">Get the data model, comms backbone, and OT security right in months 0–6. <span class="accent">Everything else depends on it.</span></p>
+                </div>
+            </section>
+
+            <!-- 20 · LAYERS 3-5 -->
+            <section class="slide slide--light">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Layers 3–5 · From DERMS to Smart Energy</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:50px;margin:20px 0 40px">Each layer adds value — none requires a rip-and-replace</h2>
+                    <div class="grid g3" style="flex:1;align-content:center">
+                        <div class="card reveal" data-d="2"><span class="num">3</span><h3>Renewable Integration</h3><p>DERMS goes live, RTS connected, zero-export automated, BESS dispatch optimized.</p></div>
+                        <div class="card reveal" data-d="3"><span class="num">4</span><h3>Microgrid &amp; Resilience</h3><p>Islanding proven, black start tested — tenants experience uninterrupted power.</p></div>
+                        <div class="card hl reveal" data-d="4"><span class="num">5</span><h3>Smart Energy Ecosystem</h3><p>VPP live, market participation, ESG reporting, demand response.</p></div>
+                    </div>
+                    <div class="foot reveal" data-d="5">Full VPP / market readiness is the long play — part of the 50-year vision, architected from day one.</div>
+                </div>
+            </section>
+
+            <!-- 21 · DIVIDER -->
+            <section class="slide slide--dark divider">
+                <div class="pad">
+                    <div class="bar reveal" data-d="1"></div>
+                    <div class="sec-no reveal" data-d="1">SECTION 06</div>
+                    <h2 class="reveal" data-d="2">Decisions &amp;<br>next steps</h2>
+                    <p class="sub reveal" data-d="3">This meeting is the window to shape the Q4 tender.</p>
+                </div>
+            </section>
+
+            <!-- 22 · DECISIONS WE RECOMMEND -->
+            <section class="slide slide--light">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Decisions We Recommend Today</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:52px;margin:18px 0 36px">Six things to lock in</h2>
+                    <div class="grid g3" style="flex:1;align-content:center">
+                        <div class="card reveal" data-d="1"><span class="num">1</span><h3>Design the data model once</h3><p>It's the foundation for every future capability.</p></div>
+                        <div class="card reveal" data-d="2"><span class="num">2</span><h3>Zero-export at Layer 2</h3><p>Start enforcement early — don't wait for full DERMS.</p></div>
+                        <div class="card reveal" data-d="3"><span class="num">3</span><h3>Build for SurvalentONE as the VPP</h3><p>The platform that runs the grid should aggregate the DERs.</p></div>
+                        <div class="card reveal" data-d="4"><span class="num">4</span><h3>Procure microgrid controllers with BESS</h3><p>Distributed architecture from the start.</p></div>
+                        <div class="card reveal" data-d="5"><span class="num">5</span><h3>Define the operations team early</h3><p>Who runs the control room post-commissioning.</p></div>
+                        <div class="card hl reveal" data-d="6"><span class="num">6</span><h3>Shape the Q4 tender</h3><p>This meeting is the window to influence the spec.</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 23 · HOW WE MOVE FORWARD -->
+            <section class="slide slide--dark">
+                <div class="pad">
+                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">How We Move Forward</span></div>
+                    <h2 class="reveal" data-d="1" style="font-size:54px;margin:20px 0 44px">Four steps from here</h2>
+                    <div class="grid g2" style="margin-bottom:auto">
+                        <div class="card reveal" data-d="2"><span class="num">1</span><h3>Validate parameters</h3><p>Confirm and refine the design basis together — today.</p></div>
+                        <div class="card reveal" data-d="3"><span class="num">2</span><h3>Reference architecture document</h3><p>Survalent APAC delivers within two weeks.</p></div>
+                        <div class="card reveal" data-d="4"><span class="num">3</span><h3>Technical workshop</h3><p>Deep-dive with the VSIP engineering team.</p></div>
+                        <div class="card reveal" data-d="5"><span class="num">4</span><h3>Reference site visit</h3><p>See SurvalentONE running at scale.</p></div>
+                    </div>
+                    <p class="quote reveal" data-d="6" style="font-size:42px;margin-top:48px;max-width:1600px">We come as your <span class="accent">system architects</span> — to help you make decisions today you won't regret in 50 years.</p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <div class="rail" id="rail"></div>
+    <div class="deck-controls" id="deckControls"></div>
+
+    <button class="fs-hint" id="fsHint" title="Fullscreen (F)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+        <span>Fullscreen</span><kbd>F</kbd>
+    </button>
+
+    <div class="rotate-nudge hide" id="rotateNudge">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        <div>Rotate for the full view</div>
+        <small>tap to dismiss</small>
+    </div>
+
+    <button class="tap-hint tap-hint--prev" id="tapPrev" aria-label="Previous slide">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+    </button>
+    <button class="tap-hint tap-hint--next" id="tapNext" aria-label="Next slide">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+    </button>
+
+    <div class="ios-spacer" aria-hidden="true"></div>
+
+    <script>
+        class SlidePresentation {
+            constructor() {
+                this.slides = document.querySelectorAll('.slide');
+                this.currentSlide = 0;
+                this.stage = document.getElementById('deckStage');
+                this.rail = document.getElementById('rail');
+                this.setupStageScale();
+                this.setupKeyboardNav();
+                this.setupTouchNav();
+                this.setupMouseWheel();
+                this.setupFsHint();
+                this.setupRotateNudge();
+                this.setupTapHints();
+                this.setupIosRoom();
+                this.showSlide(0);
+            }
+            setupStageScale() {
+                const vv = window.visualViewport;
+                const scale = () => {
+                    const w = (vv && vv.width) || window.innerWidth;
+                    const h = (vv && vv.height) || window.innerHeight;
+                    const f = Math.min(w / 1920, h / 1080);
+                    const x = (w - 1920 * f) / 2;
+                    const y = (h - 1080 * f) / 2;
+                    this.stage.style.transform = `translate(${x}px, ${y}px) scale(${f})`;
+                };
+                scale();
+                window.addEventListener('resize', scale);
+                window.addEventListener('orientationchange', scale);
+                if (vv) { vv.addEventListener('resize', scale); vv.addEventListener('scroll', scale); }
+            }
+            setupKeyboardNav() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); this.nextSlide(); }
+                    else if (e.key === 'ArrowLeft') { e.preventDefault(); this.prevSlide(); }
+                    else if (e.key === 'End') this.showSlide(this.slides.length - 1);
+                    else if (e.key === 'Home') this.showSlide(0);
+                    else if (e.key === 'f' || e.key === 'F') { e.preventDefault(); this.toggleFullscreen(); }
+                });
+            }
+            toggleFullscreen() {
+                if (!document.documentElement.requestFullscreen) return;
+                if (document.fullscreenElement) document.exitFullscreen();
+                else document.documentElement.requestFullscreen();
+            }
+            setupFsHint() {
+                const hint = document.getElementById('fsHint');
+                if (!hint) return;
+                if (!document.documentElement.requestFullscreen) { hint.remove(); return; }
+                let idle;
+                const refresh = () => {
+                    clearTimeout(idle);
+                    hint.classList.add('hide');
+                    if (document.fullscreenElement) return;
+                    idle = setTimeout(() => hint.classList.remove('hide'), 3000);
+                };
+                hint.addEventListener('click', () => this.toggleFullscreen());
+                ['mousemove', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, refresh));
+                document.addEventListener('fullscreenchange', refresh);
+                refresh();
+            }
+            setupRotateNudge() {
+                const nudge = document.getElementById('rotateNudge');
+                if (!nudge) return;
+                const touch = matchMedia('(pointer: coarse)').matches;
+                const isPhone = touch && Math.min(window.innerWidth, window.innerHeight) <= 480;
+                if (!isPhone) { nudge.remove(); return; }
+                let dismissed = false;
+                const sync = () => {
+                    const portrait = window.innerHeight > window.innerWidth;
+                    nudge.classList.toggle('hide', dismissed || !portrait);
+                };
+                nudge.addEventListener('click', () => { dismissed = true; sync(); });
+                window.addEventListener('resize', sync);
+                window.addEventListener('orientationchange', sync);
+                sync();
+            }
+            setupTapHints() {
+                const prev = document.getElementById('tapPrev'), next = document.getElementById('tapNext');
+                if (!prev || !next) return;
+                if (!matchMedia('(pointer: coarse)').matches) { prev.remove(); next.remove(); return; }
+                prev.classList.add('show'); next.classList.add('show');
+                let idle;
+                const reveal = () => {
+                    clearTimeout(idle);
+                    prev.classList.remove('hide'); next.classList.remove('hide');
+                    idle = setTimeout(() => { prev.classList.add('hide'); next.classList.add('hide'); }, 2500);
+                };
+                prev.addEventListener('click', () => { this.prevSlide(); reveal(); });
+                next.addEventListener('click', () => { this.nextSlide(); reveal(); });
+                ['touchstart', 'touchend'].forEach(ev => document.addEventListener(ev, reveal));
+                reveal();
+            }
+            setupIosRoom() {
+                const touch = matchMedia('(pointer: coarse)').matches;
+                const noFs = !document.documentElement.requestFullscreen;
+                if (touch && noFs) document.documentElement.classList.add('ios-room');
+            }
+            setupTouchNav() {
+                let sx = 0, sy = 0;
+                document.addEventListener('touchstart', (e) => {
+                    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+                });
+                document.addEventListener('touchend', (e) => {
+                    const t = e.changedTouches[0];
+                    if (Math.abs(t.clientX - sx) > 12 || Math.abs(t.clientY - sy) > 12) return;
+                    if (e.target.closest('button, a, .rotate-nudge')) return;
+                    if (t.clientX < window.innerWidth * 0.25) this.prevSlide();
+                    else this.nextSlide();
+                });
+            }
+            setupMouseWheel() {
+                let lock = false;
+                document.addEventListener('wheel', (e) => {
+                    if (lock) return;
+                    lock = true; setTimeout(() => lock = false, 600);
+                    if (e.deltaY > 0) this.nextSlide();
+                    if (e.deltaY < 0) this.prevSlide();
+                }, { passive: true });
+            }
+            showSlide(index, opts = {}) {
+                const reveal = opts.reveal || 'all';
+                this.currentSlide = Math.max(0, Math.min(index, this.slides.length - 1));
+                this.slides.forEach((slide, i) => {
+                    const active = i === this.currentSlide;
+                    slide.classList.toggle('active', active);
+                    slide.classList.toggle('visible', active);
+                });
+                const cur = this.slides[this.currentSlide];
+                this.setFrags(cur, reveal);
+                this.animateCounts(cur);
+                this.updateControls();
+            }
+            setFrags(slide, mode) {
+                if (!slide) return;
+                slide.querySelectorAll('.frag').forEach(f => f.classList.toggle('frag-in', mode === 'all'));
+            }
+            animateCounts(slide) {
+                if (!slide) return;
+                const els = slide.querySelectorAll('[data-count]');
+                if (!els.length) return;
+                const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+                els.forEach(el => {
+                    const to = parseFloat(el.dataset.count);
+                    const dec = parseInt(el.dataset.dec || '0', 10);
+                    const pre = el.dataset.pre || '', suf = el.dataset.suf || '';
+                    const fmt = v => pre + v.toFixed(dec) + suf;
+                    if (reduce) { el.textContent = fmt(to); return; }
+                    const dur = 1200, t0 = performance.now();
+                    const tick = (now) => {
+                        const p = Math.min(1, (now - t0) / dur);
+                        el.textContent = fmt(to * (1 - Math.pow(1 - p, 3)));
+                        if (p < 1) requestAnimationFrame(tick);
+                    };
+                    requestAnimationFrame(tick);
+                });
+            }
+            nextSlide() {
+                const slide = this.slides[this.currentSlide];
+                const pending = slide ? Array.from(slide.querySelectorAll('.frag:not(.frag-in)')) : [];
+                if (pending.length) {
+                    const g = pending[0].dataset.fg;
+                    if (g === undefined) pending[0].classList.add('frag-in');
+                    else pending.filter(f => f.dataset.fg === g).forEach(f => f.classList.add('frag-in'));
+                    return;
+                }
+                this.showSlide(this.currentSlide + 1, { reveal: 'none' });
+            }
+            prevSlide() {
+                const slide = this.slides[this.currentSlide];
+                const shown = slide ? Array.from(slide.querySelectorAll('.frag.frag-in')) : [];
+                if (shown.length) {
+                    const last = shown[shown.length - 1];
+                    const g = last.dataset.fg;
+                    if (g === undefined) last.classList.remove('frag-in');
+                    else shown.filter(f => f.dataset.fg === g).forEach(f => f.classList.remove('frag-in'));
+                    return;
+                }
+                this.showSlide(this.currentSlide - 1, { reveal: 'all' });
+            }
+            updateControls() {
+                const c = document.getElementById('deckControls');
+                if (c) c.textContent = String(this.currentSlide + 1).padStart(2, '0') + ' / ' + String(this.slides.length).padStart(2, '0');
+                if (this.rail) this.rail.style.width = ((this.currentSlide + 1) / this.slides.length * 100) + 'vw';
+            }
+        }
+        new SlidePresentation();
+    </script>
+</body>
+</html>
