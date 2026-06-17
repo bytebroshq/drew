@@ -61,6 +61,23 @@
             var(--cream); }
         .grid-fx { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
         .globe-fx { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        /* office-location cards — ambient churn (pop in / hold / fade out) over the rotating globe */
+        .offices { position: relative; flex: 1; align-self: stretch; }
+        .office { position: absolute; left: 0; top: 0; padding: 13px 19px; border-radius: 11px;
+            background: rgba(255,255,255,.86); border: 1.6px solid var(--teal-deep);
+            box-shadow: 0 14px 34px -20px rgba(8,43,56,.6); backdrop-filter: blur(3px);
+            font-family: var(--font-mono); line-height: 1.18; white-space: nowrap; opacity: 0; }
+        .office.hq { border-color: var(--orange); }
+        .office .c { display: block; font-size: 19px; color: var(--text-dark); }
+        .office .r { display: block; font-size: 19px; font-weight: 700; color: var(--text-dark); letter-spacing: .2px; }
+        .office.hq .r { color: var(--orange); }
+        .office.live { animation: officeLife var(--life, 3.4s) var(--ease) forwards; }
+        @keyframes officeLife {
+            0%   { opacity: 0; transform: translateY(12px) scale(.92); }
+            13%  { opacity: 1; transform: translateY(0) scale(1); }
+            76%  { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-7px) scale(.97); }
+        }
         .pad { position: absolute; inset: 0; z-index: 1; padding: 96px 110px; display: flex; flex-direction: column; }
 
         /* === TYPE HELPERS === */
@@ -208,13 +225,15 @@
         .quote .accent { color: var(--orange); }
 
         /* === CONTROLS / HELPERS (engine) === */
-        .deck-controls { position: fixed; right: 26px; bottom: 22px; z-index: 1000; font-family: var(--font-mono); font-size: 14px; letter-spacing: 2px; color: var(--text-muted); background: rgba(255,255,255,.75); padding: 7px 14px; border-radius: 20px; backdrop-filter: blur(6px); }
+        .deck-controls { position: fixed; right: 30px; bottom: 30px; z-index: 1000; font-family: var(--font-mono); font-size: 13px; letter-spacing: 1.5px; color: var(--text-muted); display: inline-flex; align-items: baseline; gap: 6px; background: rgba(255,255,255,.78); padding: 9px 15px; border-radius: 22px; backdrop-filter: blur(6px); box-shadow: 0 4px 18px rgba(0,0,0,.08); }
+        .deck-controls .cur { color: var(--text-dark); font-weight: 700; }
+        .deck-controls .sep { opacity: .45; }
         .rail { position: fixed; left: 0; bottom: 0; height: 3px; background: var(--orange); z-index: 1000; transition: width .5s var(--ease); }
-        .fs-hint { position: fixed; right: 26px; bottom: 38px; z-index: 1001; display: inline-flex; align-items: center; gap: 9px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 1.5px; color: var(--text-muted); background: rgba(255,255,255,.78); padding: 9px 15px; border: 0; border-radius: 22px; cursor: pointer; backdrop-filter: blur(6px); box-shadow: 0 4px 18px rgba(0,0,0,.08); transition: opacity .5s var(--ease), transform .5s var(--ease); }
+        .fs-hint { position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%); z-index: 1001; display: inline-flex; align-items: center; gap: 9px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 1.5px; color: var(--text-muted); background: rgba(255,255,255,.78); padding: 9px 15px; border: 0; border-radius: 22px; cursor: pointer; backdrop-filter: blur(6px); box-shadow: 0 4px 18px rgba(0,0,0,.08); transition: opacity .5s var(--ease), transform .5s var(--ease); }
         .fs-hint:hover { color: var(--text-dark); }
         .fs-hint svg { width: 15px; height: 15px; stroke: currentColor; stroke-width: 2; fill: none; }
         .fs-hint kbd { font: inherit; padding: 1px 6px; border-radius: 5px; background: rgba(0,0,0,.06); }
-        .fs-hint.hide { opacity: 0; transform: translateY(8px); pointer-events: none; }
+        .fs-hint.hide { opacity: 0; transform: translateX(-50%) translateY(8px); pointer-events: none; }
         .rotate-nudge { position: fixed; inset: 0; z-index: 1002; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; background: rgba(4,20,27,.93); color: var(--text-on-ink); backdrop-filter: blur(4px); font-family: var(--font-mono); font-size: 15px; letter-spacing: 1px; text-align: center; padding: 32px; transition: opacity .5s var(--ease); }
         .rotate-nudge.hide { opacity: 0; pointer-events: none; }
         .rotate-nudge svg { width: 52px; height: 52px; stroke: currentColor; stroke-width: 1.6; fill: none; animation: tilt 2.4s var(--ease) infinite; }
@@ -351,6 +370,88 @@
         .ecoflow .down { color: var(--teal); }
         .ecoflow .up { color: var(--orange); }
 
+        /* ============================================================
+           MINIMALIST LINE THEME
+           No paper: kill fills, shadows, rounded corners. Content blocks
+           read as a hairline top-rule + mono index (spec sheet); diagram
+           elements become thin square outlines (schematic). Transparent
+           everywhere so the globe / perspective grid show through.
+           ============================================================ */
+        :root { --rule: rgba(17,32,31,.16); --rule-2: rgba(17,32,31,.32); }
+
+        /* content cards → hairline top rule, no box */
+        .card, .slide--dark .card {
+            background: transparent; border: none; border-radius: 0; box-shadow: none;
+            border-top: 1px solid var(--rule); padding: 24px 26px 22px 0;
+        }
+        .slide--dark .card { border-top-color: var(--line-on-ink); }
+        .card .num, .slide--dark .card .num {
+            background: transparent; color: var(--teal-deep); border: none; border-radius: 0;
+            width: auto; height: auto; padding: 0; display: block;
+            font-family: var(--font-mono); font-size: 15px; font-weight: 600; letter-spacing: 2px;
+        }
+        .slide--dark .card .num { color: var(--teal); }
+        .card h3 { margin: 13px 0 10px; }
+        .card.hl, .slide--dark .card.hl { border-top: 2px solid var(--orange); box-shadow: none; }
+        .card.hl .num, .slide--dark .card.hl .num { color: var(--orange); background: transparent; }
+
+        /* crop-mark frame stays as the emphasis variant — drop the top rule
+           so the registration marks read on their own */
+        .card.frame, .slide--dark .card.frame { border-top: none; padding: 34px 30px; }
+
+        /* qualities → hairline top rule */
+        .qual, .slide--dark .qual {
+            background: transparent; border: none; border-radius: 0; box-shadow: none;
+            border-top: 1px solid var(--rule); padding: 22px 20px 18px 0;
+        }
+        .slide--dark .qual { border-top-color: var(--line-on-ink); }
+
+        /* flow steps → hairline top rule (a sequence) */
+        .flow .step, .slide--dark .flow .step {
+            background: transparent; border: none; border-radius: 0;
+            border-top: 1px solid var(--rule); padding: 20px 18px 0 0;
+        }
+        .slide--dark .flow .step { border-top-color: var(--line-on-ink); }
+        .flow .step.hl { border-top-width: 2px; }   /* inline border-color paints it orange */
+
+        /* two-column checklist → flatten to rules */
+        .pair { border: none; border-radius: 0; border-top: 1px solid var(--rule); overflow: visible; }
+        .pair .lft { background: transparent; }
+        .pair .rgt { background: transparent; border-left: 1px solid var(--rule); }
+
+        /* diagram elements → thin square outline, no fill */
+        .modcol, .slide--dark .modcol { background: transparent; border: 1px solid var(--line-on-ink); border-radius: 0; }
+        .modcol.derms { border-color: var(--orange); background: transparent; }
+        .modcol .tag { border-radius: 2px; }
+        .band, .band.core, .band.gridb { background: transparent; border-radius: 0; }
+        .arch .node { background: transparent; border-radius: 0; }
+        .arch .platform-band { background: transparent; border-radius: 0; }
+        .gantt .bar { background: transparent; border-radius: 0; border: 1px solid rgba(14,139,134,.5); }
+        .gantt .bar.last { background: transparent; border-color: rgba(255,122,51,.6); }
+        .region, .slide--dark .region { background: transparent; border-radius: 3px; }
+        .pill { border-radius: 3px; }
+
+        /* light slides — semi-opaque cards with a signature-color left edge */
+        .accent-cards .card {
+            background: rgba(255,255,255,.62);
+            border: 1px solid var(--rule);
+            border-top: 1px solid var(--rule);
+            border-left: 3px solid var(--teal-deep);
+            padding: 26px 30px;
+            backdrop-filter: blur(2px);
+        }
+        .accent-cards .card h3 { margin-top: 0; }
+        .accent-cards .card .num { color: var(--teal-deep); }
+        .accent-cards .card.hl { border-left-color: var(--orange); border-top-color: var(--rule); }
+        .accent-cards .card.hl .num { color: var(--orange); }
+
+        .s3-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 64px; }
+        .s3-head-text { flex: 1; min-width: 0; }
+        .brand-logo { flex-shrink: 0; width: 290px; height: auto; margin-top: 8px; }
+        .slide.visible .brand-logo { opacity: .92; }
+        .title-logo { position: absolute; right: 110px; bottom: 96px; width: 220px; height: auto; z-index: 2; }
+        .slide.visible .title-logo { opacity: .85; }
+
         @media print {
             html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
             .deck-viewport, .deck-stage { position: static; width: auto; height: auto; transform: none !important; overflow: visible; }
@@ -382,10 +483,11 @@
                     </div>
                     <div class="foot reveal" data-d="5">Survalent APAC · June 26, 2026 · 9:00 AM · VSIP I Office · with MP · Confidential</div>
                 </div>
+                <svg class="title-logo reveal" data-d="6" role="img" aria-label="Survalent" viewBox="0 0 398 76" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="m193.509 38.364-4.677-9.724c1.379-1.532 8.147-4.676 13.772-5.52 5.624-.843 11.628-.113 16.281 2.76 4.293 2.652 5.714 9.406 6.041 12.484V70.94h-10.018v-2.196c-7.295 3.484-14.809 4.464-20.906 1.306-6.098-3.157-8.929-10.78-7.078-18.184s10.998-10.998 15.68-11.107c3.745-.087 7.658.617 9.146.98.182-.907.436-3.048 0-4.355-.544-1.633-2.504-2.94-6.315-3.05-3.049-.086-9.095 2.433-11.926 4.03m18.706 14.502v3.604c-.818 1.559-3.231 4.39-7.401 4.45-5.214.078-6.233-2.588-6.033-5.091.235-2.94 3.456-4.76 6.654-4.926 2.998-.156 5.278 1.122 6.541 1.83zm-49.682 19.038-23.131-48.046h13.549l10.344 22.346 9.147-22.346h14.482zm-53.464-.964V23.858h8.711l1.198 3.72c1.742-1.45 6.25-4.415 10.344-4.676s7.679.879 9.24 1.306L134.75 36.72c-1.56-.569-4.753-1.97-7.279-1.622-2.526.349-4.827 2.759-5.662 3.92V70.94zM72.95 23.858H59.356v29.617c0 9.877 8.558 18.636 17.883 18.43 9.325-.208 11.798-1.485 15.052-4.502v3.537h9.505V23.858H88.644v27.288c0 2.403 0 8.963-7.53 9.072-7.53.11-8.164-6.669-8.164-9.072zm-25.736-2.466 4.724-10.94c-9.597-5.41-19.871-7.793-30.893-5.696C8.721 8.333 3.22 20.499 9.635 32.712c3.562 6.784 15.977 10.356 22.536 11.886 6.615 1.744 10.975 5.055 7.345 11.278-3.717 6.372-21.772 1.239-28.17-1.959L5 64.55c19.914 11.506 35.32 5.992 39.152 4.107 14.033-6.903 12.736-26.996 1.826-32.287-6.216-3.015-11.14-4.736-14.94-6.065-2.87-1.004-5.1-1.784-6.76-2.727-3.859-2.191-3.917-6.06-2.377-8.368 1.546-2.316 4.055-2.518 6.783-2.54 4.907-.041 14.172 2.671 18.53 4.723m185.02 49.547V5.279h12.981v65.66zm58.931-6.696c-5.319 4.204-11.722 7.624-19.208 7.388-15.411-.487-21.794-13.246-21.473-27.383.331-14.568 13.609-22.977 27.482-20.587 11.106 1.913 14.676 12.344 14.676 17.097v9.203h-29.254c.112 5.74 4.776 10.052 10.244 10.244 4.491.157 9.916-3.382 11.721-4.925zM264.093 41.74h16.434c-.132-2.468-1.897-6.895-6.231-6.895-3.743 0-7.422.173-10.203 6.895m34.73 29.2V24.448h8.83l1.134 3.16c2.079-1.81 5.647-5.401 17.336-3.946 10.806 1.345 13.799 11.765 14.339 16.907v30.37h-12.8V44.25c0-2.51-.883-7.734-6.311-9.085-5.366-1.335-7.889 1.61-9.824 3.869l-.067.078V70.94zm43.372-35.776v-11.05h4.44V14.74h12.845v9.375h8.858v11.05h-8.858V58.19c.841 3.135 6.453 2.076 9.357.793l2.22 11.066c-1.692.804-6.946 2.247-14.431 1.582s-9.779-6.383-9.991-9.16V35.164z" fill="#fff"/><path d="M377.16 70.94V55.28h15.429v15.66z" fill="red" fill-opacity=".39"/></svg>
             </section>
 
             <!-- 2 · AGENDA -->
-            <section class="slide slide--light">
+            <section class="slide slide--dark slide--grid">
                 <div class="pad">
                     <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Agenda</span></div>
                     <h2 class="reveal" data-d="1" style="font-size:56px;margin:20px 0 14px">What we'll cover today</h2>
@@ -404,35 +506,36 @@
             <!-- 3 · ABOUT SURVALENT — stability -->
             <section class="slide slide--dark slide--grid">
                 <div class="pad">
-                    <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">About Survalent</span></div>
-                    <h2 class="reveal" data-d="1" style="font-size:54px;margin:20px 0 14px">A stable, ADMS-focused company</h2>
-                    <p class="lede reveal" data-d="2" style="margin-bottom:auto">Privately held, debt-free, and reinvesting heavily in product — built to be a partner for decades, not a quarter.</p>
-                    <div class="grid g3" style="align-content:end;gap:50px;margin-bottom:30px">
-                        <div class="bignum reveal" data-d="3"><div class="v"><span data-count="60">60</span></div><div class="l">Years of service in the<br>utility industry</div></div>
-                        <div class="bignum reveal" data-d="4"><div class="v tv"><span data-count="98">98</span><span class="u">%</span></div><div class="l">Customer retention rate<br>since 1983</div></div>
-                        <div class="bignum reveal" data-d="5"><div class="v ov"><span data-count="20.3" data-dec="1">20.3</span><span class="u">%</span></div><div class="l">Of top-line revenue<br>invested in R&amp;D</div></div>
+                    <div class="s3-head">
+                        <div class="s3-head-text">
+                            <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">About Survalent</span></div>
+                            <h2 class="reveal" data-d="1" style="font-size:54px;margin:20px 0 14px">A stable, ADMS-focused company</h2>
+                            <p class="lede reveal" data-d="2" style="margin-bottom:0">Privately held, debt-free, and reinvesting heavily in product — built to be a partner for decades, not a quarter.</p>
+                        </div>
+                        <svg class="brand-logo reveal" data-d="1" role="img" aria-label="Survalent" viewBox="0 0 398 76" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="m193.509 38.364-4.677-9.724c1.379-1.532 8.147-4.676 13.772-5.52 5.624-.843 11.628-.113 16.281 2.76 4.293 2.652 5.714 9.406 6.041 12.484V70.94h-10.018v-2.196c-7.295 3.484-14.809 4.464-20.906 1.306-6.098-3.157-8.929-10.78-7.078-18.184s10.998-10.998 15.68-11.107c3.745-.087 7.658.617 9.146.98.182-.907.436-3.048 0-4.355-.544-1.633-2.504-2.94-6.315-3.05-3.049-.086-9.095 2.433-11.926 4.03m18.706 14.502v3.604c-.818 1.559-3.231 4.39-7.401 4.45-5.214.078-6.233-2.588-6.033-5.091.235-2.94 3.456-4.76 6.654-4.926 2.998-.156 5.278 1.122 6.541 1.83zm-49.682 19.038-23.131-48.046h13.549l10.344 22.346 9.147-22.346h14.482zm-53.464-.964V23.858h8.711l1.198 3.72c1.742-1.45 6.25-4.415 10.344-4.676s7.679.879 9.24 1.306L134.75 36.72c-1.56-.569-4.753-1.97-7.279-1.622-2.526.349-4.827 2.759-5.662 3.92V70.94zM72.95 23.858H59.356v29.617c0 9.877 8.558 18.636 17.883 18.43 9.325-.208 11.798-1.485 15.052-4.502v3.537h9.505V23.858H88.644v27.288c0 2.403 0 8.963-7.53 9.072-7.53.11-8.164-6.669-8.164-9.072zm-25.736-2.466 4.724-10.94c-9.597-5.41-19.871-7.793-30.893-5.696C8.721 8.333 3.22 20.499 9.635 32.712c3.562 6.784 15.977 10.356 22.536 11.886 6.615 1.744 10.975 5.055 7.345 11.278-3.717 6.372-21.772 1.239-28.17-1.959L5 64.55c19.914 11.506 35.32 5.992 39.152 4.107 14.033-6.903 12.736-26.996 1.826-32.287-6.216-3.015-11.14-4.736-14.94-6.065-2.87-1.004-5.1-1.784-6.76-2.727-3.859-2.191-3.917-6.06-2.377-8.368 1.546-2.316 4.055-2.518 6.783-2.54 4.907-.041 14.172 2.671 18.53 4.723m185.02 49.547V5.279h12.981v65.66zm58.931-6.696c-5.319 4.204-11.722 7.624-19.208 7.388-15.411-.487-21.794-13.246-21.473-27.383.331-14.568 13.609-22.977 27.482-20.587 11.106 1.913 14.676 12.344 14.676 17.097v9.203h-29.254c.112 5.74 4.776 10.052 10.244 10.244 4.491.157 9.916-3.382 11.721-4.925zM264.093 41.74h16.434c-.132-2.468-1.897-6.895-6.231-6.895-3.743 0-7.422.173-10.203 6.895m34.73 29.2V24.448h8.83l1.134 3.16c2.079-1.81 5.647-5.401 17.336-3.946 10.806 1.345 13.799 11.765 14.339 16.907v30.37h-12.8V44.25c0-2.51-.883-7.734-6.311-9.085-5.366-1.335-7.889 1.61-9.824 3.869l-.067.078V70.94zm43.372-35.776v-11.05h4.44V14.74h12.845v9.375h8.858v11.05h-8.858V58.19c.841 3.135 6.453 2.076 9.357.793l2.22 11.066c-1.692.804-6.946 2.247-14.431 1.582s-9.779-6.383-9.991-9.16V35.164z" fill="#fff"/><path d="M377.16 70.94V55.28h15.429v15.66z" fill="red" fill-opacity=".39"/></svg>
+                    </div>
+                    <div class="grid g3" style="align-content:end;gap:50px;margin:auto 0 30px">
+                        <div class="bignum reveal" data-d="3"><div class="v"><span data-count="60" data-count-delay="800">60</span></div><div class="l">Years of service in the<br>utility industry</div></div>
+                        <div class="bignum reveal" data-d="4"><div class="v tv"><span data-count="98" data-count-delay="950">98</span><span class="u">%</span></div><div class="l">Customer retention rate<br>since 1983</div></div>
+                        <div class="bignum reveal" data-d="5"><div class="v ov"><span data-count="20.3" data-dec="1" data-count-delay="1100">20.3</span><span class="u">%</span></div><div class="l">Of top-line revenue<br>invested in R&amp;D</div></div>
                     </div>
                     <div class="foot reveal" data-d="6">Consistent revenue growth &amp; profitability · Zero debt · Singular focus on ADMS and grid operations.</div>
                 </div>
             </section>
 
             <!-- 4 · GLOBAL SALES & SUPPORT -->
-            <section class="slide slide--light">
+            <section class="slide slide--light accent-cards">
                 <div class="pad">
                     <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">Global Sales &amp; Support</span></div>
                     <h2 class="reveal" data-d="1" style="font-size:54px;margin:20px 0 16px">Local presence, worldwide</h2>
-                    <p class="lede reveal" data-d="2" style="margin-bottom:46px">Control rooms run 24/7 — so does our support. Regional teams deliver and stand behind every deployment.</p>
-                    <div class="grid g3" style="flex:1;align-content:center">
-                        <div class="card reveal" data-d="3"><h3 class="teal">In-region delivery</h3><p>Sales, engineering, and support across the Americas, EMEA, and APAC — including the team in front of you today.</p></div>
-                        <div class="card reveal" data-d="4"><h3 class="teal">24/7 control-room support</h3><p>Mission-critical systems are supported the way they run — around the clock, with utility-grade SLAs.</p></div>
-                        <div class="card reveal" data-d="5"><h3 class="teal">Upgrades included</h3><p>Software upgrades are part of support pricing — no rip-and-replace, no surprise relicensing.</p></div>
-                    </div>
-                    <div class="foot reveal" data-d="6">For VSIP 4, delivery is led by Survalent APAC with our local partner MP.</div>
+                    <p class="lede reveal" data-d="2" style="margin-bottom:30px">Control rooms run <b style="color:var(--orange);font-weight:700">24/7</b> — so does our support. Regional teams deliver and stand behind every deployment.</p>
+                    <div class="offices" aria-hidden="true" data-offices="Brampton,|Ontario|hq; Buffalo, NY|USA; San Luis Potosí,|Mexico; Guatemala City,|Guatemala; Bogotá,|Colombia; Lima,|Peru; Dubai,|UAE; Skopje,|Macedonia; Gurugram,|India; Kuala Lumpur,|Malaysia; Manila,|Philippines; Tangerang,|Indonesia"></div>
+                    <div class="foot reveal" data-d="3">For VSIP 4, delivery is led by Survalent APAC with our local partner MP.</div>
                 </div>
             </section>
 
             <!-- 5 · ADMS DEPLOYMENTS WORLDWIDE -->
-            <section class="slide slide--dark slide--grid">
+            <section class="slide slide--light">
                 <div class="pad">
                     <div class="h-eyebrow reveal" data-d="1"><span class="dot"></span><span class="kicker">ADMS Deployments Worldwide</span></div>
                     <h2 class="reveal" data-d="1" style="font-size:52px;margin:20px 0 16px">Proven on every continent</h2>
@@ -835,6 +938,7 @@
                 this.setupIosRoom();
                 this.setupGridFx();
                 this.setupGlobeFx();
+                this.setupOffices();
                 this.showSlide(0);
             }
             setupStageScale() {
@@ -1208,6 +1312,84 @@
                 };
                 requestAnimationFrame(loop);
             }
+            setupOffices() {
+                // Office cards that pop in, hold, then fade out — an ambient churn that
+                // previews the global footprint without ever showing the full list at once.
+                this.officeEngine = null;
+                const box = document.querySelector('.offices');
+                if (!box) return;
+                const list = (box.dataset.offices || '').split(';').map(s => s.trim()).filter(Boolean).map(entry => {
+                    const [top, bottom, hq] = entry.split('|').map(s => s.trim());
+                    return { top, bottom, hq: hq === 'hq' };
+                });
+                if (!list.length) return;
+                const SLOTS = Math.min(5, list.length);
+                const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+                const eng = { box, running: false, timers: [], queue: [], live: [] };
+
+                const refill = () => {           // shuffled queue so cards don't repeat back-to-back
+                    const q = list.slice();
+                    for (let i = q.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [q[i], q[j]] = [q[j], q[i]];
+                    }
+                    eng.queue = q;
+                };
+                const next = () => { if (!eng.queue.length) refill(); return eng.queue.shift(); };
+                const makeCard = (o) => {
+                    const el = document.createElement('div');
+                    el.className = 'office' + (o.hq ? ' hq' : '');
+                    el.innerHTML = '<span class="c">' + o.top + '</span><span class="r">' + o.bottom + '</span>';
+                    return el;
+                };
+                const spot = (el) => {           // pick the emptiest of a few random positions
+                    const maxX = Math.max(0, box.clientWidth - el.offsetWidth);
+                    const maxY = Math.max(0, box.clientHeight - el.offsetHeight);
+                    let best = { x: 0, y: 0 }, bestD = -1;
+                    for (let k = 0; k < 6; k++) {
+                        const x = Math.random() * maxX, y = Math.random() * maxY;
+                        let d = 1e12;
+                        eng.live.forEach(r => { if (r.el !== el) { const dx = r.x - x, dy = r.y - y; d = Math.min(d, dx * dx + dy * dy); } });
+                        if (d > bestD) { bestD = d; best = { x, y }; }
+                    }
+                    return best;
+                };
+                const place = (el, animate) => {
+                    box.appendChild(el);
+                    const rec = { el, x: 0, y: 0 };
+                    eng.live.push(rec);
+                    const p = spot(el);
+                    rec.x = p.x; rec.y = p.y;
+                    el.style.left = p.x + 'px'; el.style.top = p.y + 'px';
+                    if (animate) { void el.offsetWidth; el.classList.add('live'); }
+                    else { el.style.opacity = 1; }
+                    return rec;
+                };
+                const runSlot = (i) => {
+                    if (!eng.running) return;
+                    const el = makeCard(next());
+                    place(el, true);
+                    const cleanup = () => {
+                        el.removeEventListener('animationend', cleanup);
+                        el.remove();
+                        eng.live = eng.live.filter(r => r.el !== el);
+                        if (eng.running) runSlot(i);     // immediately re-cycle this slot
+                    };
+                    el.addEventListener('animationend', cleanup);
+                };
+                eng.start = () => {
+                    if (eng.running) return;
+                    eng.running = true;
+                    if (reduce) { for (let i = 0; i < SLOTS; i++) place(makeCard(next()), false); return; }
+                    for (let i = 0; i < SLOTS; i++) eng.timers.push(setTimeout(() => runSlot(i), i * 520));
+                };
+                eng.stop = () => {
+                    eng.running = false;
+                    eng.timers.forEach(clearTimeout); eng.timers = [];
+                    box.innerHTML = ''; eng.live = [];
+                };
+                this.officeEngine = eng;
+            }
             showSlide(index, opts = {}) {
                 const reveal = opts.reveal || 'all';
                 this.currentSlide = Math.max(0, Math.min(index, this.slides.length - 1));
@@ -1219,6 +1401,10 @@
                 const cur = this.slides[this.currentSlide];
                 this.setFrags(cur, reveal);
                 this.animateCounts(cur);
+                if (this.officeEngine) {
+                    if (cur && cur.contains(this.officeEngine.box)) this.officeEngine.start();
+                    else this.officeEngine.stop();
+                }
                 this.updateControls();
             }
             setFrags(slide, mode) {
@@ -1236,13 +1422,18 @@
                     const pre = el.dataset.pre || '', suf = el.dataset.suf || '';
                     const fmt = v => pre + v.toFixed(dec) + suf;
                     if (reduce) { el.textContent = fmt(to); return; }
-                    const dur = 1200, t0 = performance.now();
-                    const tick = (now) => {
-                        const p = Math.min(1, (now - t0) / dur);
-                        el.textContent = fmt(to * (1 - Math.pow(1 - p, 3)));
-                        if (p < 1) requestAnimationFrame(tick);
+                    const delay = parseInt(el.dataset.countDelay || '0', 10);
+                    el.textContent = fmt(0);          // hold at start so delayed counts don't flash the final value
+                    const run = () => {
+                        const dur = 1200, t0 = performance.now();
+                        const tick = (now) => {
+                            const p = Math.min(1, (now - t0) / dur);
+                            el.textContent = fmt(to * (1 - Math.pow(1 - p, 3)));
+                            if (p < 1) requestAnimationFrame(tick);
+                        };
+                        requestAnimationFrame(tick);
                     };
-                    requestAnimationFrame(tick);
+                    if (delay > 0) setTimeout(run, delay); else run();
                 });
             }
             nextSlide() {
@@ -1270,7 +1461,13 @@
             }
             updateControls() {
                 const c = document.getElementById('deckControls');
-                if (c) c.textContent = String(this.currentSlide + 1).padStart(2, '0') + ' / ' + String(this.slides.length).padStart(2, '0');
+                if (c) {
+                    const cur = String(this.currentSlide + 1).padStart(2, '0');
+                    const tot = String(this.slides.length).padStart(2, '0');
+                    c.innerHTML = '<span class="cur">' + cur + '</span><span class="sep">/</span><span class="tot">' + tot + '</span>';
+                    const slide = this.slides[this.currentSlide];
+                    c.classList.toggle('on-dark', !!(slide && slide.classList.contains('slide--dark')));
+                }
                 if (this.rail) this.rail.style.width = ((this.currentSlide + 1) / this.slides.length * 100) + 'vw';
             }
         }
